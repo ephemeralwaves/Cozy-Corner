@@ -10,6 +10,8 @@ import { drawThemedRoom } from "./room";
 import { recolorCat, recolorSelf } from "./recolor";
 import {
   CAT_PRESETS,
+  HAIR_STYLES,
+  hairRow,
   loadTheme,
   ROOM_PRESETS,
   saveTheme,
@@ -17,7 +19,7 @@ import {
   type Theme,
 } from "./theme";
 
-const CUSTOMIZE_H = 368;
+const CUSTOMIZE_H = 396;
 
 function hideMenu(menu: HTMLElement) {
   menu.hidden = true;
@@ -77,7 +79,7 @@ async function handleAction(
 }
 
 function bindCustomize(theme: Theme, onChange: () => void) {
-  const ids: Array<keyof Theme> = [
+  const ids = [
     "wall",
     "floor",
     "furniture",
@@ -86,21 +88,29 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     "shirt",
     "pants",
     "fur",
-  ];
+  ] as const;
   const inputs = Object.fromEntries(
     ids.map((id) => [id, document.querySelector<HTMLInputElement>(`#color-${id}`)!]),
-  ) as Record<keyof Theme, HTMLInputElement>;
+  ) as Record<(typeof ids)[number], HTMLInputElement>;
 
   const syncInputs = () => {
     for (const id of ids) inputs[id].value = theme[id];
   };
   syncInputs();
 
+  const syncHair = () => {
+    for (const button of document.querySelectorAll<HTMLButtonElement>("#styles-hair button")) {
+      button.classList.toggle("on", button.dataset.hair === theme.hairStyle);
+    }
+  };
+
   const apply = () => {
     saveTheme(theme);
     onChange();
     syncInputs();
+    syncHair();
   };
+  syncHair();
 
   for (const id of ids) {
     inputs[id].addEventListener("input", () => {
@@ -119,6 +129,14 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     const preset = ROOM_PRESETS.find((item) => item.id === button?.dataset.preset);
     if (!preset) return;
     Object.assign(theme, preset.theme);
+    apply();
+  });
+
+  document.querySelector("#styles-hair")!.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest("button");
+    const style = HAIR_STYLES.find((item) => item.id === button?.dataset.hair);
+    if (!style) return;
+    theme.hairStyle = style.id;
     apply();
   });
 
@@ -226,7 +244,7 @@ async function boot() {
     ctx.clearRect(0, 0, 256, 192);
     drawThemedRoom(ctx, theme, glow);
     cat.draw(ctx, catSheet, SCALE);
-    buddy.draw(ctx, selfSheet, SCALE);
+    buddy.draw(ctx, selfSheet, SCALE, hairRow(theme.hairStyle));
     buddyHotspot.style.left = `${Math.round(buddy.x) * SCALE}px`;
     buddyHotspot.style.top = `${Math.round(buddy.y) * SCALE}px`;
     catHotspot.style.left = `${Math.round(cat.x) * SCALE}px`;

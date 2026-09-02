@@ -99,6 +99,7 @@ const C = {
   tea: [176, 92, 64],
   skin: [240, 200, 160],
   hair: [74, 55, 40],
+  hairDark: [58, 42, 30],
   shirt: [126, 184, 160],
   pants: [92, 74, 110],
   shoes: [61, 43, 31],
@@ -199,7 +200,72 @@ function blit(dst, src, ox, oy) {
   }
 }
 
-function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = false, typeHand = 0 } = {}) {
+const HAIR_STYLES = ["short", "long", "afro", "bun", "pony"];
+
+function drawHair(p, { type = false, gy = 0, style = "short" } = {}) {
+  const hy = type ? 0 : 1 + gy;
+  const H = C.hair;
+  const D = C.hairDark;
+
+  if (style === "long") {
+    rect(p, 2, hy + 2, 2, 8, H);
+    rect(p, 12, hy + 2, 2, 8, H);
+    rect(p, 3, hy + 8, 1, 3, H);
+    rect(p, 12, hy + 8, 1, 3, H);
+    set(p, 2, hy + 9, D);
+    set(p, 13, hy + 9, D);
+    rect(p, 4, hy, 8, 3, H);
+    rect(p, 3, hy + 1, 2, 3, H);
+    rect(p, 11, hy + 1, 2, 3, H);
+    return;
+  }
+
+  if (style === "afro") {
+    const top = Math.max(0, hy - 1);
+    rect(p, 4, top, 8, 2, H);
+    rect(p, 3, top, 10, 1, H);
+    rect(p, 2, hy, 12, 4, H);
+    rect(p, 1, hy + 1, 2, 3, H);
+    rect(p, 13, hy + 1, 2, 3, H);
+    rect(p, 3, hy + 4, 2, 2, H);
+    rect(p, 11, hy + 4, 2, 2, H);
+    set(p, 4, hy + 1, D);
+    set(p, 11, hy + 1, D);
+    set(p, 7, top, D);
+    set(p, 2, hy + 2, D);
+    set(p, 13, hy + 2, D);
+    return;
+  }
+
+  if (style === "bun") {
+    const top = Math.max(0, hy - 1);
+    rect(p, 6, top, 4, 2, H);
+    rect(p, 7, top, 2, 3, H);
+    set(p, 7, top, D);
+    set(p, 8, top, D);
+    rect(p, 4, hy + 1, 8, 2, H);
+    rect(p, 5, hy + 2, 2, 1, H);
+    rect(p, 9, hy + 2, 2, 1, H);
+    return;
+  }
+
+  if (style === "pony") {
+    rect(p, 4, hy, 8, 2, H);
+    rect(p, 3, hy + 1, 2, 2, H);
+    rect(p, 11, hy + 1, 2, 2, H);
+    rect(p, 12, hy + 2, 3, 2, H);
+    rect(p, 13, hy + 4, 2, 5, H);
+    set(p, 14, hy + 3, D);
+    set(p, 14, hy + 8, D);
+    return;
+  }
+
+  rect(p, 4, hy, 8, 3, H);
+  rect(p, 3, hy + 1, 2, 3, H);
+  rect(p, 11, hy + 1, 2, 3, H);
+}
+
+function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = false, typeHand = 0, hair = "short" } = {}) {
   const p = pixels(16, 16);
 
   if (type) {
@@ -209,9 +275,6 @@ function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = fal
     rect(p, 4, 5, 7, 6, C.shirt);
     rect(p, 5, 1, 6, 5, C.skin);
     rect(p, 4, 2, 8, 4, C.skin);
-    rect(p, 4, 0, 8, 3, C.hair);
-    rect(p, 3, 1, 2, 3, C.hair);
-    rect(p, 11, 1, 2, 3, C.hair);
     if (blink) {
       rect(p, 6, 4, 2, 1, C.eye);
       rect(p, 9, 4, 2, 1, C.eye);
@@ -229,6 +292,7 @@ function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = fal
     set(p, 5, leftY, C.skin);
     rect(p, 10, 6, 2, 3, C.skin);
     rect(p, 11, rightY, 4, 2, C.skin);
+    drawHair(p, { type: true, style: hair });
     return p;
   }
 
@@ -252,9 +316,6 @@ function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = fal
 
   rect(p, 5, 2 + gy, 6, 6, C.skin);
   rect(p, 4, 3 + gy, 8, 4, C.skin);
-  rect(p, 4, 1 + gy, 8, 3, C.hair);
-  rect(p, 3, 2 + gy, 2, 3, C.hair);
-  rect(p, 11, 2 + gy, 2, 3, C.hair);
 
   if (blink) {
     rect(p, 6, 5 + gy, 2, 1, C.eye);
@@ -266,26 +327,29 @@ function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = fal
     set(p, 10, 6 + gy, C.blush);
   }
   set(p, 8, 7 + gy, C.outline);
+  drawHair(p, { gy, style: hair });
   return p;
 }
 
 function drawSheet() {
-  const sheet = pixels(192, 16);
-  const frames = [
-    drawChar({ bounce: 0 }),
-    drawChar({ bounce: 1 }),
-    drawChar({ bounce: 0 }),
-    drawChar({ bounce: 0, blink: true }),
-    drawChar({ sit: true }),
-    drawChar({ sit: true, blink: true }),
-    drawChar({ bounce: 0, walk: 1 }),
-    drawChar({ bounce: 1, walk: -1 }),
-    drawChar({ type: true, typeHand: 0 }),
-    drawChar({ type: true, typeHand: 1 }),
-    drawChar({ type: true, typeHand: 0, blink: true }),
-    drawChar({ type: true, typeHand: 2 }),
+  const poses = [
+    { bounce: 0 },
+    { bounce: 1 },
+    { bounce: 0 },
+    { bounce: 0, blink: true },
+    { sit: true },
+    { sit: true, blink: true },
+    { bounce: 0, walk: 1 },
+    { bounce: 1, walk: -1 },
+    { type: true, typeHand: 0 },
+    { type: true, typeHand: 1 },
+    { type: true, typeHand: 0, blink: true },
+    { type: true, typeHand: 2 },
   ];
-  frames.forEach((f, i) => blit(sheet, f, i * 16, 0));
+  const sheet = pixels(192, 16 * HAIR_STYLES.length);
+  HAIR_STYLES.forEach((hair, row) => {
+    poses.forEach((pose, i) => blit(sheet, drawChar({ ...pose, hair }), i * 16, row * 16));
+  });
   return sheet;
 }
 

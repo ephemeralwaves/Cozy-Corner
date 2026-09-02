@@ -35,6 +35,7 @@ function recolor(source: HTMLImageElement, swaps: { from: Triple; to: Triple }[]
 export function recolorSelf(source: HTMLImageElement, theme: Theme): HTMLCanvasElement {
   return recolor(source, [
     { from: SRC.hair, to: rgb(theme.hair) },
+    { from: SRC.hairDark, to: rgb(shade(theme.hair, 0.78)) },
     { from: SRC.skin, to: rgb(theme.skin) },
     { from: SRC.shirt, to: rgb(theme.shirt) },
     { from: SRC.pants, to: rgb(theme.pants) },

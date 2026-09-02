@@ -1,10 +1,21 @@
 const STORAGE_KEY = "cozy-corner-theme";
 
+export const HAIR_STYLES = [
+  { id: "short", label: "Short" },
+  { id: "long", label: "Long" },
+  { id: "afro", label: "Afro" },
+  { id: "bun", label: "Bun" },
+  { id: "pony", label: "Pony" },
+] as const;
+
+export type HairStyle = (typeof HAIR_STYLES)[number]["id"];
+
 export type Theme = {
   wall: string;
   floor: string;
   furniture: string;
   hair: string;
+  hairStyle: HairStyle;
   skin: string;
   shirt: string;
   pants: string;
@@ -16,11 +27,21 @@ export const DEFAULT_THEME: Theme = {
   floor: "#c4a574",
   furniture: "#8b5a3c",
   hair: "#4a3728",
+  hairStyle: "short",
   skin: "#f0c8a0",
   shirt: "#7eb8a0",
   pants: "#5c4a6e",
   fur: "#e09a4a",
 };
+
+export function hairRow(style: HairStyle): number {
+  const index = HAIR_STYLES.findIndex((item) => item.id === style);
+  return index < 0 ? 0 : index;
+}
+
+function isHairStyle(value: unknown): value is HairStyle {
+  return HAIR_STYLES.some((item) => item.id === value);
+}
 
 export const ROOM_PRESETS = [
   { id: "cream", label: "Cream", theme: { wall: "#e8d5b7", floor: "#c4a574", furniture: "#8b5a3c" } },
@@ -46,6 +67,7 @@ export const CAT_PRESETS = [
 
 export const SRC = {
   hair: [74, 55, 40] as const,
+  hairDark: [58, 42, 30] as const,
   skin: [240, 200, 160] as const,
   shirt: [126, 184, 160] as const,
   pants: [92, 74, 110] as const,
@@ -79,7 +101,8 @@ export function loadTheme(): Theme {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...DEFAULT_THEME };
     const parsed = JSON.parse(raw) as Partial<Theme>;
-    return { ...DEFAULT_THEME, ...parsed };
+    const hairStyle = isHairStyle(parsed.hairStyle) ? parsed.hairStyle : DEFAULT_THEME.hairStyle;
+    return { ...DEFAULT_THEME, ...parsed, hairStyle };
   } catch {
     return { ...DEFAULT_THEME };
   }

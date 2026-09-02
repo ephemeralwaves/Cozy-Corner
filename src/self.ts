@@ -110,8 +110,9 @@ export class PixelSelf {
     return IDLE_FRAMES + SIT_FRAMES + WALK_FRAMES + (this.frame % TYPE_FRAMES);
   }
 
-  draw(ctx: CanvasRenderingContext2D, sheet: CanvasImageSource, scale: number) {
+  draw(ctx: CanvasRenderingContext2D, sheet: CanvasImageSource, scale: number, hairRow = 0) {
     const sx = this.sheetFrame() * FRAME_W;
+    const sy = hairRow * FRAME_H;
     const dx = Math.round(this.x) * scale;
     const dy = Math.round(this.y) * scale;
     const dw = FRAME_W * scale;
@@ -120,9 +121,9 @@ export class PixelSelf {
     if (this.facing < 0) {
       ctx.translate(dx + dw, dy);
       ctx.scale(-1, 1);
-      ctx.drawImage(sheet, sx, 0, FRAME_W, FRAME_H, 0, 0, dw, dh);
+      ctx.drawImage(sheet, sx, sy, FRAME_W, FRAME_H, 0, 0, dw, dh);
     } else {
-      ctx.drawImage(sheet, sx, 0, FRAME_W, FRAME_H, dx, dy, dw, dh);
+      ctx.drawImage(sheet, sx, sy, FRAME_W, FRAME_H, dx, dy, dw, dh);
     }
     ctx.restore();
   }
