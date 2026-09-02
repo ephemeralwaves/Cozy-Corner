@@ -2,7 +2,19 @@
 
 A tiny always-on-top pixel room with a little virtual self inside. Drag it around the desktop, watch it idle / sit / walk, and hide or quit from the tray or a right-click menu.
 
-It can also drive the YouTube player you already host at [thinkcolorful.org/ytplayer](https://thinkcolorful.org/ytplayer/): Cozy Corner opens that page in a hidden WebView and sends Play / Pause / Stop into `window.youtubePlayer`. Paste a URL in the player window first, then control it from the overlay.
+It can also drive the YouTube player at [thinkcolorful.org/ytplayer](https://thinkcolorful.org/ytplayer/): Cozy Corner opens that page in a hidden WebView and sends Play / Pause / Stop into `window.youtubePlayer`. Paste a URL in the player window first, then control it from the overlay.
+
+## Download (Windows)
+
+Grab the latest installer from **[Releases](https://github.com/ephemeralwaves/Cozy-Corner/releases/latest)**.
+
+1. Download the `.exe` (NSIS setup, named like `Cozy Corner_0.1.0_x64-setup.exe`).
+2. Run it and finish the installer.
+3. Start **Cozy Corner** from the Start menu. Control it from the tray icon or a right-click on the room.
+
+Windows may warn that the app is unsigned. Choose **More info** → **Run anyway** if you trust the build.
+
+To publish a new build: run `npm run tauri build`, then on GitHub create a [new release](https://github.com/ephemeralwaves/Cozy-Corner/releases/new), attach the files under `src-tauri/target/release/bundle/nsis/`, and publish.
 
 ## Requirements
 
@@ -35,13 +47,13 @@ The widget is 256×192 CSS pixels (64×48 art at 4×, integer scale, `image-rend
 
 The player is still your site; this app does not re-implement YouTube. It only loads that page and calls `playMusic()` / `stopMusic()`.
 
-Release zip (Windows):
+## Build from source
 
 ```bash
 npm run tauri build
 ```
 
-The NSIS installer and exe land under `src-tauri/target/release/bundle/nsis/`.
+The NSIS installer and exe land under `src-tauri/target/release/bundle/nsis/`. Attach those files to a GitHub release so the Download section above stays current.
 
 ## macOS flags (same codebase, test on a Mac)
 
