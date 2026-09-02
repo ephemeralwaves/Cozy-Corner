@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cozy Corner</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+  <body>
+    <div class="widget">
+      <div class="drag" data-tauri-drag-region></div>
+      <canvas id="room" width="256" height="192"></canvas>
+      <button type="button" id="radio-hotspot" title="Play / pause piano"></button>
+      <button type="button" id="buddy-hotspot" title="Sit and type"></button>
+      <button type="button" id="cat-hotspot" title="Customize cat"></button>
+      <div id="notes" class="notes" hidden>♪ ♫</div>
+    </div>
+    <section id="customize" class="customize-panel" hidden>
+      <div class="cust-tabs" id="cust-tabs">
+        <button type="button" data-tab="room" class="on">Room</button>
+        <button type="button" data-tab="self">You</button>
+        <button type="button" data-tab="cat">Cat</button>
+      </div>
+      <div data-panel="room">
+        <div class="customize-row">
+          <label>Wall <input id="color-wall" type="color" /></label>
+          <label>Floor <input id="color-floor" type="color" /></label>
+          <label>Furniture <input id="color-furniture" type="color" /></label>
+        </div>
+        <div id="presets-room" class="presets">
+          <button type="button" data-preset="cream">Cream</button>
+          <button type="button" data-preset="sage">Sage</button>
+          <button type="button" data-preset="blush">Blush</button>
+          <button type="button" data-preset="night">Night</button>
+          <button type="button" data-preset="sky">Sky</button>
+        </div>
+      </div>
+      <div data-panel="self" hidden>
+        <div class="customize-row">
+          <label>Hair <input id="color-hair" type="color" /></label>
+          <label>Skin <input id="color-skin" type="color" /></label>
+          <label>Shirt <input id="color-shirt" type="color" /></label>
+          <label>Pants <input id="color-pants" type="color" /></label>
+        </div>
+        <div id="presets-self" class="presets">
+          <button type="button" data-self="default">Teal</button>
+          <button type="button" data-self="raven">Raven</button>
+          <button type="button" data-self="berry">Berry</button>
+          <button type="button" data-self="moss">Moss</button>
+        </div>
+      </div>
+      <div data-panel="cat" hidden>
+        <div class="customize-row">
+          <label>Fur <input id="color-fur" type="color" /></label>
+        </div>
+        <div id="presets-cat" class="presets">
+          <button type="button" data-cat="orange">Orange</button>
+          <button type="button" data-cat="gray">Gray</button>
+          <button type="button" data-cat="black">Black</button>
+          <button type="button" data-cat="cream">Cream</button>
+        </div>
+      </div>
+      <button type="button" id="customize-done">Done</button>
+    </section>
+    <div id="menu" class="menu" hidden>
+      <button type="button" data-action="customize">Customize</button>
+      <button type="button" data-action="player">YouTube Player</button>
+      <button type="button" data-action="play">Play / Pause</button>
+      <button type="button" data-action="stop">Stop music</button>
+      <button type="button" data-action="hide">Hide</button>
+      <button type="button" data-action="quit">Quit</button>
+    </div>
+  </body>
+</html>

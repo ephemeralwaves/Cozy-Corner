@@ -1,0 +1,281 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  width: 256px;
+  height: 192px;
+}
+
+body.customize {
+  height: 368px;
+  background: #f6ead4;
+}
+
+.widget {
+  width: 256px;
+  height: 192px;
+  position: relative;
+}
+
+.drag {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  z-index: 1;
+}
+
+.drag:active {
+  cursor: grabbing;
+}
+
+#room {
+  display: block;
+  width: 256px;
+  height: 192px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+  position: relative;
+  z-index: 0;
+}
+
+#radio-hotspot {
+  position: absolute;
+  left: 8px;
+  top: 28px;
+  width: 84px;
+  height: 120px;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+#buddy-hotspot {
+  position: absolute;
+  left: 96px;
+  top: 112px;
+  width: 64px;
+  height: 64px;
+  z-index: 4;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+#cat-hotspot {
+  position: absolute;
+  left: 96px;
+  top: 88px;
+  width: 64px;
+  height: 64px;
+  z-index: 3;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.notes {
+  position: absolute;
+  left: 36px;
+  top: 12px;
+  z-index: 2;
+  color: #3d2b1f;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 1px;
+  pointer-events: none;
+  animation: float-note 1.2s ease-in-out infinite;
+}
+
+.notes[hidden] {
+  display: none;
+}
+
+@keyframes float-note {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.menu {
+  position: fixed;
+  z-index: 10;
+  min-width: 88px;
+  padding: 4px;
+  background: #f6ead4;
+  border: 2px solid #3d2b1f;
+  image-rendering: pixelated;
+  font-family: "Segoe UI", "Lucida Grande", sans-serif;
+  font-size: 12px;
+}
+
+.menu[hidden] {
+  display: none;
+}
+
+.menu button {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #3d2b1f;
+  text-align: left;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.menu button:hover {
+  background: #e8c9a0;
+}
+
+.customize-panel {
+  box-sizing: border-box;
+  width: 256px;
+  height: 176px;
+  padding: 8px 10px;
+  background: #f6ead4;
+  border: 2px solid #3d2b1f;
+  border-top: 0;
+  font-family: "Segoe UI", "Lucida Grande", sans-serif;
+  font-size: 11px;
+  color: #3d2b1f;
+}
+
+.customize-panel[hidden] {
+  display: none;
+}
+
+.cust-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.cust-tabs button {
+  flex: 1;
+  border: 2px solid #3d2b1f;
+  background: #e8d5b7;
+  padding: 4px 0;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #3d2b1f;
+}
+
+.cust-tabs button.on {
+  background: #c4e0b4;
+}
+
+.customize-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.customize-row label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.customize-row input[type="color"] {
+  width: 100%;
+  height: 22px;
+  padding: 0;
+  border: 2px solid #3d2b1f;
+  background: #fff8dc;
+  cursor: pointer;
+}
+
+.presets {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.presets button {
+  flex: 1;
+  border: 2px solid #3d2b1f;
+  padding: 4px 0;
+  font-size: 9px;
+  cursor: pointer;
+  color: #3d2b1f;
+}
+
+.presets button[data-preset="cream"] {
+  background: #e8d5b7;
+}
+
+.presets button[data-preset="sage"] {
+  background: #d7e4cc;
+}
+
+.presets button[data-preset="blush"] {
+  background: #f3d4ce;
+}
+
+.presets button[data-preset="night"] {
+  background: #3f4556;
+  color: #f6ead4;
+}
+
+.presets button[data-preset="sky"] {
+  background: #d3e7f4;
+}
+
+.presets button[data-self="default"] {
+  background: #7eb8a0;
+}
+
+.presets button[data-self="raven"] {
+  background: #4a5568;
+  color: #f6ead4;
+}
+
+.presets button[data-self="berry"] {
+  background: #f2b6c6;
+}
+
+.presets button[data-self="moss"] {
+  background: #7eb87a;
+}
+
+.presets button[data-cat="orange"] {
+  background: #e09a4a;
+}
+
+.presets button[data-cat="gray"] {
+  background: #9aa0a8;
+}
+
+.presets button[data-cat="black"] {
+  background: #3a3230;
+  color: #f6ead4;
+}
+
+.presets button[data-cat="cream"] {
+  background: #e8d0a8;
+}
+
+#customize-done {
+  width: 100%;
+  border: 2px solid #3d2b1f;
+  background: #c4e0b4;
+  padding: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
