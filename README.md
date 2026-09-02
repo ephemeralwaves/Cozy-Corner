@@ -39,7 +39,7 @@ npm run tauri dev
 
 The widget is 256×192 CSS pixels (64×48 art at 4×, integer scale, `image-rendering: pixelated`). It stays above other windows, has no title bar, and skips the taskbar. Use the tray icon for **Show**, **Hide**, **YouTube Player**, **Play / Pause**, **Stop music**, and **Quit**. Right-click the room for the same actions. Click the desk on the right to play/pause. Closing a window hides it instead of exiting.
 
-### Music (your ytplayer)
+### Music
 
 1. Right-click the room → **YouTube Player** (or use the tray).
 2. Paste a YouTube URL and press Play once in that window so the IFrame API can start.
