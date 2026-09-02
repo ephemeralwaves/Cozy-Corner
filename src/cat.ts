@@ -7,19 +7,19 @@ const SIT_FRAMES = 2;
 const WALK_FRAMES = 2;
 const SLEEP_FRAMES = 2;
 
-const MIN_X = 22;
-const MAX_X = 32;
-const BACK_Y = 22;
+const MIN_X = 46;
+const MAX_X = 58;
+const BACK_Y = 26;
 
 export class PixelCat {
-  x = 24;
+  x = 50;
   y = BACK_Y;
   facing: 1 | -1 = 1;
   state: CatState = "idle";
   frame = 0;
   private frameMs = 0;
   private stateMs = 0;
-  private walkTarget = 24;
+  private walkTarget = 50;
 
   update(dtMs: number) {
     this.frameMs += dtMs;
@@ -104,7 +104,7 @@ export class PixelCat {
   private startWalk() {
     let next = MIN_X + Math.random() * (MAX_X - MIN_X);
     if (Math.abs(next - this.x) < 5) {
-      next = this.x < 20 ? MAX_X - 1 : MIN_X + 1;
+      next = this.x < (MIN_X + MAX_X) / 2 ? MAX_X - 1 : MIN_X + 1;
     }
     this.walkTarget = next;
     this.enter("walk");

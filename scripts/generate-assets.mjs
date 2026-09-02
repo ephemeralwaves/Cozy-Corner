@@ -97,6 +97,9 @@ const C = {
   leafDark: [58, 112, 70],
   mug: [245, 238, 220],
   tea: [176, 92, 64],
+  book: [245, 236, 214],
+  bookDark: [122, 62, 58],
+  bookLite: [255, 250, 240],
   skin: [240, 200, 160],
   hair: [74, 55, 40],
   hairDark: [58, 42, 30],
@@ -119,20 +122,20 @@ const C = {
 };
 
 function drawRoom() {
-  const p = pixels(64, 48);
-  rect(p, 0, 0, 64, 48, C.outline);
-  rect(p, 1, 1, 62, 30, C.wall);
-  rect(p, 1, 24, 62, 7, C.wallShadow);
-  rect(p, 1, 31, 62, 16, C.floor);
+  const p = pixels(80, 48);
+  rect(p, 0, 0, 80, 48, C.outline);
+  rect(p, 1, 1, 78, 30, C.wall);
+  rect(p, 1, 24, 78, 7, C.wallShadow);
+  rect(p, 1, 31, 78, 16, C.floor);
   for (let y = 32; y < 47; y += 3) {
-    rect(p, 1, y, 62, 1, C.floorDark);
+    rect(p, 1, y, 78, 1, C.floorDark);
   }
 
-  rect(p, 22, 6, 20, 16, C.frame);
-  rect(p, 24, 8, 16, 12, C.glass);
-  rect(p, 24, 8, 16, 5, C.glassLite);
-  rect(p, 31, 8, 2, 12, C.frame);
-  rect(p, 24, 13, 16, 1, C.frame);
+  rect(p, 24, 4, 26, 18, C.frame);
+  rect(p, 26, 6, 22, 14, C.glass);
+  rect(p, 26, 6, 22, 6, C.glassLite);
+  rect(p, 36, 6, 2, 14, C.frame);
+  rect(p, 26, 12, 22, 1, C.frame);
 
   // Black grand piano (front view): open lid, keys, gold stand, bench
   rect(p, 4, 15, 16, 1, C.piano);
@@ -153,35 +156,53 @@ function drawRoom() {
   rect(p, 3, 27, 17, 1, C.pianoDark);
   rect(p, 3, 28, 2, 6, C.pianoDark);
   rect(p, 18, 28, 2, 6, C.pianoDark);
-  rect(p, 8, 32, 7, 2, C.gold);
-  rect(p, 8, 34, 2, 3, C.pianoDark);
-  rect(p, 13, 34, 2, 3, C.pianoDark);
+  rect(p, 6, 25, 10, 2, C.gold);
+  rect(p, 6, 27, 2, 4, C.pianoDark);
+  rect(p, 14, 27, 2, 4, C.pianoDark);
 
-  rect(p, 40, 24, 18, 10, C.desk);
-  rect(p, 39, 23, 20, 3, C.deskTop);
-  rect(p, 41, 26, 3, 2, C.mug);
-  set(p, 42, 26, C.tea);
-  rect(p, 49, 14, 9, 9, C.outline);
-  rect(p, 50, 15, 7, 7, [96, 168, 196]);
-  rect(p, 51, 16, 2, 2, [220, 240, 250]);
-  rect(p, 52, 23, 3, 1, C.outline);
-  rect(p, 45, 24, 8, 2, C.keys);
-  for (const kx of [46, 48, 50, 52]) {
-    set(p, kx, 24, C.blackKey);
+  rect(p, 32, 21, 10, 8, C.desk);
+  rect(p, 33, 22, 8, 6, C.deskTop);
+  rect(p, 31, 28, 12, 4, C.desk);
+  rect(p, 31, 26, 2, 7, C.frame);
+  rect(p, 41, 26, 2, 7, C.frame);
+  rect(p, 32, 32, 2, 4, C.frame);
+  rect(p, 40, 32, 2, 4, C.frame);
+
+  rect(p, 56, 24, 18, 10, C.desk);
+  rect(p, 55, 23, 20, 3, C.deskTop);
+  rect(p, 59, 2, 14, 11, C.frame);
+  rect(p, 60, 3, 12, 9, [216, 184, 120]);
+  rect(p, 61, 4, 4, 4, [243, 234, 210]);
+  set(p, 62, 4, [196, 92, 92]);
+  rect(p, 66, 4, 5, 3, [215, 228, 204]);
+  set(p, 68, 4, [111, 146, 179]);
+  rect(p, 62, 8, 6, 3, [243, 212, 206]);
+  set(p, 64, 8, [196, 92, 106]);
+  rect(p, 65, 14, 9, 9, C.outline);
+  rect(p, 66, 15, 7, 7, [96, 168, 196]);
+  rect(p, 67, 16, 2, 2, [220, 240, 250]);
+  rect(p, 68, 23, 3, 1, C.outline);
+  rect(p, 60, 24, 11, 3, [44, 44, 52]);
+  rect(p, 61, 24, 9, 1, [228, 224, 214]);
+  for (const kx of [62, 64, 66, 68]) {
+    set(p, kx, 24, [44, 44, 52]);
   }
-  rect(p, 40, 26, 2, 6, C.desk);
-  rect(p, 40, 31, 8, 2, C.deskTop);
-  rect(p, 40, 33, 2, 3, C.desk);
-  rect(p, 46, 33, 2, 3, C.desk);
+  rect(p, 61, 25, 2, 1, [228, 224, 214]);
+  rect(p, 64, 25, 3, 1, [228, 224, 214]);
+  rect(p, 68, 25, 2, 1, [228, 224, 214]);
+  rect(p, 56, 26, 2, 6, C.desk);
+  rect(p, 56, 31, 8, 2, C.deskTop);
+  rect(p, 56, 33, 2, 3, C.desk);
+  rect(p, 62, 33, 2, 3, C.desk);
 
-  rect(p, 22, 38, 22, 6, C.rug);
-  rect(p, 23, 39, 20, 4, C.rugDark);
-  rect(p, 24, 40, 18, 2, C.rug);
+  rect(p, 26, 38, 28, 6, C.rug);
+  rect(p, 27, 39, 26, 4, C.rugDark);
+  rect(p, 28, 40, 24, 2, C.rug);
 
-  rect(p, 0, 0, 64, 1, C.outline);
-  rect(p, 0, 47, 64, 1, C.outline);
+  rect(p, 0, 0, 80, 1, C.outline);
+  rect(p, 0, 47, 80, 1, C.outline);
   rect(p, 0, 0, 1, 48, C.outline);
-  rect(p, 63, 0, 1, 48, C.outline);
+  rect(p, 79, 0, 1, 48, C.outline);
   return p;
 }
 
@@ -201,98 +222,181 @@ function blit(dst, src, ox, oy) {
 }
 
 const HAIR_STYLES = ["short", "long", "afro", "bun", "pony"];
+const CHAR_W = 18;
+const CHAR_H = 20;
+const CHAR_PAD_X = 1;
+const CHAR_PAD_Y = 4;
 
-function drawHair(p, { type = false, gy = 0, style = "short" } = {}) {
-  const hy = type ? 0 : 1 + gy;
+function drawHair(p, { type = false, gy = 0, style = "short", ox = 0, oy = 0, back = false } = {}) {
+  const hy = (type ? 0 : 1 + gy) + oy;
   const H = C.hair;
   const D = C.hairDark;
 
   if (style === "long") {
-    rect(p, 2, hy + 2, 2, 8, H);
-    rect(p, 12, hy + 2, 2, 8, H);
-    rect(p, 3, hy + 8, 1, 3, H);
-    rect(p, 12, hy + 8, 1, 3, H);
-    set(p, 2, hy + 9, D);
-    set(p, 13, hy + 9, D);
-    rect(p, 4, hy, 8, 3, H);
-    rect(p, 3, hy + 1, 2, 3, H);
-    rect(p, 11, hy + 1, 2, 3, H);
+    rect(p, ox + 2, hy + 2, 2, 8, H);
+    rect(p, ox + 12, hy + 2, 2, 8, H);
+    rect(p, ox + 3, hy + 8, 1, 3, H);
+    rect(p, ox + 12, hy + 8, 1, 3, H);
+    set(p, ox + 2, hy + 9, D);
+    set(p, ox + 13, hy + 9, D);
+    rect(p, ox + 4, hy, 8, 3, H);
+    rect(p, ox + 3, hy + 1, 2, 3, H);
+    rect(p, ox + 11, hy + 1, 2, 3, H);
+    if (back) {
+      rect(p, ox + 4, hy + 2, 8, 4, H);
+      rect(p, ox + 5, hy + 6, 6, 2, H);
+    }
     return;
   }
 
   if (style === "afro") {
-    const top = Math.max(0, hy - 1);
-    rect(p, 4, top, 8, 2, H);
-    rect(p, 3, top, 10, 1, H);
-    rect(p, 2, hy, 12, 4, H);
-    rect(p, 1, hy + 1, 2, 3, H);
-    rect(p, 13, hy + 1, 2, 3, H);
-    rect(p, 3, hy + 4, 2, 2, H);
-    rect(p, 11, hy + 4, 2, 2, H);
-    set(p, 4, hy + 1, D);
-    set(p, 11, hy + 1, D);
-    set(p, 7, top, D);
-    set(p, 2, hy + 2, D);
-    set(p, 13, hy + 2, D);
+    const cx = 8.5;
+    const cy = hy + 2.6;
+    const rx = 7.3;
+    const ry = 6.2;
+    for (let y = hy - 3; y <= hy + 9; y++) {
+      for (let x = 0; x < p.w; x++) {
+        const dx = (x + 0.5 - cx) / rx;
+        const dy = (y + 0.5 - cy) / ry;
+        if (dx * dx + dy * dy > 1) continue;
+        if (!back) {
+          const fx = (x + 0.5 - cx) / 4.1;
+          const fy = (y + 0.5 - (hy + 4.3)) / 3.4;
+          if (y >= hy + 3 && fx * fx + fy * fy <= 1) continue;
+          if (y > hy + 6 && Math.abs(x + 0.5 - cx) < 4.6) continue;
+        }
+        const shade = (x + y * 3) % 7 === 0 || (x * 2 + y) % 11 === 0;
+        set(p, x, y, shade ? D : H);
+      }
+    }
     return;
   }
 
   if (style === "bun") {
-    const top = Math.max(0, hy - 1);
-    rect(p, 6, top, 4, 2, H);
-    rect(p, 7, top, 2, 3, H);
-    set(p, 7, top, D);
-    set(p, 8, top, D);
-    rect(p, 4, hy + 1, 8, 2, H);
-    rect(p, 5, hy + 2, 2, 1, H);
-    rect(p, 9, hy + 2, 2, 1, H);
+    const top = hy - 1;
+    rect(p, ox + 6, top, 4, 2, H);
+    rect(p, ox + 7, top, 2, 3, H);
+    set(p, ox + 7, top, D);
+    set(p, ox + 8, top, D);
+    rect(p, ox + 4, hy + 1, 8, 2, H);
+    rect(p, ox + 5, hy + 2, 2, 1, H);
+    rect(p, ox + 9, hy + 2, 2, 1, H);
+    if (back) rect(p, ox + 4, hy + 2, 8, 4, H);
     return;
   }
 
   if (style === "pony") {
-    rect(p, 4, hy, 8, 2, H);
-    rect(p, 3, hy + 1, 2, 2, H);
-    rect(p, 11, hy + 1, 2, 2, H);
-    rect(p, 12, hy + 2, 3, 2, H);
-    rect(p, 13, hy + 4, 2, 5, H);
-    set(p, 14, hy + 3, D);
-    set(p, 14, hy + 8, D);
+    rect(p, ox + 4, hy, 8, 2, H);
+    rect(p, ox + 3, hy + 1, 2, 2, H);
+    rect(p, ox + 11, hy + 1, 2, 2, H);
+    if (back) {
+      rect(p, ox + 4, hy + 2, 8, 4, H);
+      rect(p, ox + 7, hy + 5, 2, 6, H);
+      set(p, ox + 8, hy + 10, D);
+    } else {
+      rect(p, ox + 12, hy + 2, 3, 2, H);
+      rect(p, ox + 13, hy + 4, 2, 5, H);
+      set(p, ox + 14, hy + 3, D);
+      set(p, ox + 14, hy + 8, D);
+    }
     return;
   }
 
-  rect(p, 4, hy, 8, 3, H);
-  rect(p, 3, hy + 1, 2, 3, H);
-  rect(p, 11, hy + 1, 2, 3, H);
+  rect(p, ox + 4, hy, 8, 3, H);
+  rect(p, ox + 3, hy + 1, 2, 3, H);
+  rect(p, ox + 11, hy + 1, 2, 3, H);
+  if (back) {
+    rect(p, ox + 4, hy + 2, 8, 4, H);
+    rect(p, ox + 5, hy + 5, 6, 2, H);
+  }
 }
 
-function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = false, typeHand = 0, hair = "short" } = {}) {
-  const p = pixels(16, 16);
+function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = false, typeHand = 0, read = false, page = 0, piano = false, pianoHand = 0, hair = "short" } = {}) {
+  const body = pixels(16, 16);
+
+  if (read) {
+    rect(body, 4, 10, 7, 4, C.pants);
+    rect(body, 9, 11, 4, 3, C.pants);
+    set(body, 12, 13, C.shoes);
+    rect(body, 4, 5, 7, 6, C.shirt);
+    rect(body, 5, 1, 6, 5, C.skin);
+    rect(body, 4, 2, 8, 4, C.skin);
+    if (blink) {
+      rect(body, 6, 4, 2, 1, C.eye);
+      rect(body, 9, 4, 2, 1, C.eye);
+    } else {
+      set(body, 6, 4, C.eye);
+      set(body, 10, 4, C.eye);
+      set(body, 6, 5, C.blush);
+      set(body, 10, 5, C.blush);
+    }
+    set(body, 8, 6, C.outline);
+    rect(body, 3, 7, 2, 3, C.skin);
+    rect(body, 11, 7, 2, 3, C.skin);
+    rect(body, 5, 8, 6, 4, C.book);
+    rect(body, 8, 8, 1, 4, C.bookDark);
+    if (page) {
+      rect(body, 9, 8, 3, 3, C.bookLite);
+      set(body, 10, 9, C.bookDark);
+    }
+    set(body, 4, 8, C.skin);
+    set(body, 11, 8, C.skin);
+    const p = pixels(CHAR_W, CHAR_H);
+    blit(p, body, CHAR_PAD_X, CHAR_PAD_Y);
+    drawHair(p, { type: true, style: hair, ox: CHAR_PAD_X, oy: CHAR_PAD_Y });
+    return p;
+  }
 
   if (type) {
-    rect(p, 4, 10, 7, 4, C.pants);
-    rect(p, 9, 11, 4, 3, C.pants);
-    set(p, 12, 13, C.shoes);
-    rect(p, 4, 5, 7, 6, C.shirt);
-    rect(p, 5, 1, 6, 5, C.skin);
-    rect(p, 4, 2, 8, 4, C.skin);
+    rect(body, 4, 10, 7, 4, C.pants);
+    rect(body, 9, 11, 4, 3, C.pants);
+    set(body, 12, 13, C.shoes);
+    rect(body, 4, 5, 7, 6, C.shirt);
+    rect(body, 5, 1, 6, 5, C.skin);
+    rect(body, 4, 2, 8, 4, C.skin);
     if (blink) {
-      rect(p, 6, 4, 2, 1, C.eye);
-      rect(p, 9, 4, 2, 1, C.eye);
+      rect(body, 6, 4, 2, 1, C.eye);
+      rect(body, 9, 4, 2, 1, C.eye);
     } else {
-      set(p, 6, 4, C.eye);
-      set(p, 10, 4, C.eye);
-      set(p, 6, 5, C.blush);
-      set(p, 10, 5, C.blush);
+      set(body, 6, 4, C.eye);
+      set(body, 10, 4, C.eye);
+      set(body, 6, 5, C.blush);
+      set(body, 10, 5, C.blush);
     }
-    set(p, 8, 6, C.outline);
+    set(body, 8, 6, C.outline);
     const leftY = typeHand === 2 ? 8 : 9;
     const rightY = typeHand === 1 ? 8 : 9;
-    rect(p, 3, 6, 2, 3, C.skin);
-    set(p, 4, leftY, C.skin);
-    set(p, 5, leftY, C.skin);
-    rect(p, 10, 6, 2, 3, C.skin);
-    rect(p, 11, rightY, 4, 2, C.skin);
-    drawHair(p, { type: true, style: hair });
+    rect(body, 3, 6, 2, 3, C.skin);
+    set(body, 4, leftY, C.skin);
+    set(body, 5, leftY, C.skin);
+    rect(body, 10, 6, 2, 3, C.skin);
+    rect(body, 11, rightY, 4, 2, C.skin);
+    const p = pixels(CHAR_W, CHAR_H);
+    blit(p, body, CHAR_PAD_X, CHAR_PAD_Y);
+    drawHair(p, { type: true, style: hair, ox: CHAR_PAD_X, oy: CHAR_PAD_Y });
+    return p;
+  }
+
+  if (piano) {
+    rect(body, 4, 11, 8, 4, C.pants);
+    rect(body, 5, 14, 2, 2, C.shoes);
+    rect(body, 9, 14, 2, 2, C.shoes);
+    rect(body, 4, 6, 8, 6, C.shirt);
+    rect(body, 3, 7, 10, 4, C.shirt);
+    rect(body, 6, 5, 4, 2, C.skin);
+    rect(body, 5, 1, 6, 5, C.skin);
+    rect(body, 4, 2, 8, 4, C.skin);
+    const leftY = pianoHand === 1 ? 4 : 5;
+    const rightY = pianoHand === 2 ? 4 : 5;
+    rect(body, 2, 6, 3, 3, C.skin);
+    set(body, 2, leftY, C.skin);
+    set(body, 3, leftY - 1, C.skin);
+    rect(body, 11, 6, 3, 3, C.skin);
+    set(body, 13, rightY, C.skin);
+    set(body, 12, rightY - 1, C.skin);
+    const p = pixels(CHAR_W, CHAR_H);
+    blit(p, body, CHAR_PAD_X, CHAR_PAD_Y);
+    drawHair(p, { type: true, style: hair, ox: CHAR_PAD_X, oy: CHAR_PAD_Y, back: true });
     return p;
   }
 
@@ -300,34 +404,36 @@ function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = fal
   const leg = sit ? 0 : walk;
 
   if (!sit) {
-    rect(p, 4, 12 + gy, 3, 3, C.pants);
-    rect(p, 9, 12 + gy, 3, 3, C.pants);
-    set(p, 4 + (leg > 0 ? 1 : 0), 14 + gy, C.shoes);
-    set(p, 11 - (leg < 0 ? 1 : 0), 14 + gy, C.shoes);
+    rect(body, 4, 12 + gy, 3, 3, C.pants);
+    rect(body, 9, 12 + gy, 3, 3, C.pants);
+    set(body, 4 + (leg > 0 ? 1 : 0), 14 + gy, C.shoes);
+    set(body, 11 - (leg < 0 ? 1 : 0), 14 + gy, C.shoes);
   } else {
-    rect(p, 3, 12, 10, 3, C.pants);
-    rect(p, 2, 13, 3, 2, C.shoes);
-    rect(p, 11, 13, 3, 2, C.shoes);
+    rect(body, 3, 12, 10, 3, C.pants);
+    rect(body, 2, 13, 3, 2, C.shoes);
+    rect(body, 11, 13, 3, 2, C.shoes);
   }
 
-  rect(p, 4, 7 + gy, 8, 6, C.shirt);
-  rect(p, 3, 8 + gy, 2, 4, C.skin);
-  rect(p, 11, 8 + gy, 2, 4, C.skin);
+  rect(body, 4, 7 + gy, 8, 6, C.shirt);
+  rect(body, 3, 8 + gy, 2, 4, C.skin);
+  rect(body, 11, 8 + gy, 2, 4, C.skin);
 
-  rect(p, 5, 2 + gy, 6, 6, C.skin);
-  rect(p, 4, 3 + gy, 8, 4, C.skin);
+  rect(body, 5, 2 + gy, 6, 6, C.skin);
+  rect(body, 4, 3 + gy, 8, 4, C.skin);
 
   if (blink) {
-    rect(p, 6, 5 + gy, 2, 1, C.eye);
-    rect(p, 9, 5 + gy, 2, 1, C.eye);
+    rect(body, 6, 5 + gy, 2, 1, C.eye);
+    rect(body, 9, 5 + gy, 2, 1, C.eye);
   } else {
-    set(p, 6, 5 + gy, C.eye);
-    set(p, 10, 5 + gy, C.eye);
-    set(p, 6, 6 + gy, C.blush);
-    set(p, 10, 6 + gy, C.blush);
+    set(body, 6, 5 + gy, C.eye);
+    set(body, 10, 5 + gy, C.eye);
+    set(body, 6, 6 + gy, C.blush);
+    set(body, 10, 6 + gy, C.blush);
   }
-  set(p, 8, 7 + gy, C.outline);
-  drawHair(p, { gy, style: hair });
+  set(body, 8, 7 + gy, C.outline);
+  const p = pixels(CHAR_W, CHAR_H);
+  blit(p, body, CHAR_PAD_X, CHAR_PAD_Y);
+  drawHair(p, { gy, style: hair, ox: CHAR_PAD_X, oy: CHAR_PAD_Y });
   return p;
 }
 
@@ -345,10 +451,18 @@ function drawSheet() {
     { type: true, typeHand: 1 },
     { type: true, typeHand: 0, blink: true },
     { type: true, typeHand: 2 },
+    { read: true, page: 0 },
+    { read: true, page: 1 },
+    { read: true, page: 0, blink: true },
+    { read: true, page: 1 },
+    { piano: true, pianoHand: 0 },
+    { piano: true, pianoHand: 1 },
+    { piano: true, pianoHand: 0, blink: true },
+    { piano: true, pianoHand: 2 },
   ];
-  const sheet = pixels(192, 16 * HAIR_STYLES.length);
+  const sheet = pixels(CHAR_W * poses.length, CHAR_H * HAIR_STYLES.length);
   HAIR_STYLES.forEach((hair, row) => {
-    poses.forEach((pose, i) => blit(sheet, drawChar({ ...pose, hair }), i * 16, row * 16));
+    poses.forEach((pose, i) => blit(sheet, drawChar({ ...pose, hair }), i * CHAR_W, row * CHAR_H));
   });
   return sheet;
 }
@@ -467,9 +581,9 @@ savePng("src/assets/self.png", self);
 savePng("src/assets/cat.png", cat);
 
 const iconSrc = pixels(32, 32, [0, 0, 0, 0]);
-blit(iconSrc, nearestScale(room, 1), -16, -8);
+blit(iconSrc, nearestScale(room, 1), -24, -8);
 const tiny = nearestScale(drawChar({ bounce: 0 }), 1);
-blit(iconSrc, tiny, 8, 10);
+blit(iconSrc, tiny, 7, 8);
 const icon32 = nearestScale(iconSrc, 1);
 const icon128 = nearestScale(iconSrc, 4);
 const icon256 = nearestScale(iconSrc, 8);

@@ -10,11 +10,23 @@
   <body>
     <div class="widget">
       <div class="drag" data-tauri-drag-region></div>
-      <canvas id="room" width="256" height="192"></canvas>
-      <button type="button" id="radio-hotspot" title="Play / pause piano"></button>
-      <button type="button" id="buddy-hotspot" title="Sit and type"></button>
-      <button type="button" id="cat-hotspot" title="Customize cat"></button>
+      <canvas id="room" width="320" height="192"></canvas>
+      <button type="button" id="radio-hotspot" title="Play / pause piano" data-tauri-drag-region="false"></button>
+      <button type="button" id="board-hotspot" title="To-do list" data-tauri-drag-region="false"></button>
+      <button type="button" id="buddy-hotspot" title="Play piano" data-tauri-drag-region="false"></button>
+      <button type="button" id="cat-hotspot" title="Customize cat" data-tauri-drag-region="false"></button>
       <div id="notes" class="notes" hidden>♪ ♫</div>
+      <section id="todos" class="todo-panel" hidden>
+        <header class="todo-head">
+          <h1>To-do</h1>
+          <button type="button" id="todo-close" title="Close" aria-label="Close">×</button>
+        </header>
+        <ul id="todo-list" class="todo-list"></ul>
+        <form id="todo-form" class="todo-form">
+          <input id="todo-input" type="text" maxlength="80" placeholder="Add a note…" autocomplete="off" />
+          <button type="submit">Add</button>
+        </form>
+      </section>
     </div>
     <section id="customize" class="customize-panel" hidden>
       <div class="cust-tabs" id="cust-tabs">
@@ -27,6 +39,10 @@
           <label>Wall <input id="color-wall" type="color" /></label>
           <label>Floor <input id="color-floor" type="color" /></label>
           <label>Furniture <input id="color-furniture" type="color" /></label>
+        </div>
+        <div class="customize-row">
+          <label>Rug <input id="color-rug" type="color" /></label>
+          <label>Board <input id="color-board" type="color" /></label>
         </div>
         <div id="presets-room" class="presets">
           <button type="button" data-preset="cream">Cream</button>
@@ -55,6 +71,23 @@
           <button type="button" data-self="raven">Raven</button>
           <button type="button" data-self="berry">Berry</button>
           <button type="button" data-self="moss">Moss</button>
+        </div>
+        <div class="customize-row">
+          <span class="row-label">Robe</span>
+          <div id="styles-robe" class="presets hair-styles robe-wear">
+            <button type="button" data-robe="off">Off</button>
+            <button type="button" data-robe="on">On</button>
+          </div>
+        </div>
+        <div class="customize-row">
+          <label>Cloth <input id="color-robe" type="color" /></label>
+          <label>Sash <input id="color-sash" type="color" /></label>
+        </div>
+        <div id="presets-robe" class="presets">
+          <button type="button" data-robe-preset="sky">Sky</button>
+          <button type="button" data-robe-preset="ink">Ink</button>
+          <button type="button" data-robe-preset="rose">Rose</button>
+          <button type="button" data-robe-preset="moss">Moss</button>
         </div>
       </div>
       <div data-panel="cat" hidden>

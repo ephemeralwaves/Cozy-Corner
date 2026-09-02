@@ -14,11 +14,16 @@ export type Theme = {
   wall: string;
   floor: string;
   furniture: string;
+  rug: string;
+  board: string;
   hair: string;
   hairStyle: HairStyle;
   skin: string;
   shirt: string;
   pants: string;
+  robeOn: boolean;
+  robe: string;
+  sash: string;
   fur: string;
 };
 
@@ -26,11 +31,16 @@ export const DEFAULT_THEME: Theme = {
   wall: "#e8d5b7",
   floor: "#c4a574",
   furniture: "#8b5a3c",
+  rug: "#c45c5c",
+  board: "#be9766",
   hair: "#4a3728",
   hairStyle: "short",
   skin: "#f0c8a0",
   shirt: "#7eb8a0",
   pants: "#5c4a6e",
+  robeOn: false,
+  robe: "#7aa6e8",
+  sash: "#f0c430",
   fur: "#e09a4a",
 };
 
@@ -56,6 +66,13 @@ export const SELF_PRESETS = [
   { id: "raven", label: "Raven", hair: "#1e1c22", skin: "#f0c8a0", shirt: "#4a5568", pants: "#2d2a38" },
   { id: "berry", label: "Berry", hair: "#c45c6a", skin: "#f3c4b0", shirt: "#f2b6c6", pants: "#7a4a62" },
   { id: "moss", label: "Moss", hair: "#3a4a28", skin: "#e0b080", shirt: "#7eb87a", pants: "#3d4a38" },
+] as const;
+
+export const ROBE_PRESETS = [
+  { id: "sky", label: "Sky", robe: "#7aa6e8", sash: "#f0c430" },
+  { id: "ink", label: "Ink", robe: "#3d4a78", sash: "#d4a840" },
+  { id: "rose", label: "Rose", robe: "#e8a0b4", sash: "#f5e08a" },
+  { id: "moss", label: "Moss", robe: "#6a8f68", sash: "#e8d48a" },
 ] as const;
 
 export const CAT_PRESETS = [
@@ -102,7 +119,12 @@ export function loadTheme(): Theme {
     if (!raw) return { ...DEFAULT_THEME };
     const parsed = JSON.parse(raw) as Partial<Theme>;
     const hairStyle = isHairStyle(parsed.hairStyle) ? parsed.hairStyle : DEFAULT_THEME.hairStyle;
-    return { ...DEFAULT_THEME, ...parsed, hairStyle };
+    return {
+      ...DEFAULT_THEME,
+      ...parsed,
+      hairStyle,
+      robeOn: parsed.robeOn === true,
+    };
   } catch {
     return { ...DEFAULT_THEME };
   }

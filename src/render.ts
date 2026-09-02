@@ -1,4 +1,4 @@
-export const ROOM_W = 64;
+export const ROOM_W = 80;
 export const ROOM_H = 48;
 export const SCALE = 4;
 

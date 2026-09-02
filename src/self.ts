@@ -1,16 +1,27 @@
-export type SelfState = "idle" | "sit" | "walk" | "type";
+export const SELF_FRAME_W = 18;
+export const SELF_FRAME_H = 20;
+export const SELF_PAD_X = 1;
+export const SELF_PAD_Y = 4;
 
-const FRAME_W = 16;
-const FRAME_H = 16;
+export type SelfState = "idle" | "sit" | "walk" | "type" | "read" | "piano";
+
+const FRAME_W = SELF_FRAME_W;
+const FRAME_H = SELF_FRAME_H;
 const IDLE_FRAMES = 4;
 const SIT_FRAMES = 2;
 const WALK_FRAMES = 2;
 const TYPE_FRAMES = 4;
+const READ_FRAMES = 4;
+const PIANO_FRAMES = 4;
 
-const MIN_X = 20;
-const MAX_X = 32;
-const DESK_X = 38;
+const MIN_X = 16;
+const MAX_X = 48;
+const DESK_X = 54;
 const DESK_Y = 18;
+const CHAIR_X = 29;
+const CHAIR_Y = 20;
+const PIANO_X = 5;
+const PIANO_Y = 15;
 const GROUND_Y = 28;
 
 export class PixelSelf {
@@ -32,14 +43,38 @@ export class PixelSelf {
     return this.state === "type" || (this.state === "walk" && this.afterWalk === "type");
   }
 
+  get reading(): boolean {
+    return this.state === "read" || (this.state === "walk" && this.afterWalk === "read");
+  }
+
+  get playingPiano(): boolean {
+    return this.state === "piano" || (this.state === "walk" && this.afterWalk === "piano");
+  }
+
+  nextClickLabel(): string {
+    if (this.typing) return "Idle";
+    if (this.reading) return "Sit and type";
+    if (this.playingPiano) return "Read by the window";
+    return "Play piano";
+  }
+
   onClick() {
-    if (this.typing) {
+    const busy = this.state === "walk" ? this.afterWalk : this.state;
+    if (busy === "type") {
       this.y = GROUND_Y;
       this.facing = -1;
       this.enter("idle");
       return;
     }
-    this.goToDesk();
+    if (busy === "read") {
+      this.goToDesk();
+      return;
+    }
+    if (busy === "piano") {
+      this.goToChair();
+      return;
+    }
+    this.goToPiano();
   }
 
   update(dtMs: number) {
@@ -47,7 +82,17 @@ export class PixelSelf {
     this.stateMs += dtMs;
 
     const frameDur =
-      this.state === "walk" ? 160 : this.state === "type" ? 110 : this.state === "sit" ? 480 : 280;
+      this.state === "walk"
+        ? 160
+        : this.state === "type"
+          ? 110
+          : this.state === "read"
+            ? 420
+            : this.state === "piano"
+              ? 130
+              : this.state === "sit"
+                ? 480
+                : 280;
     if (this.frameMs >= frameDur) {
       this.frameMs -= frameDur;
       const count =
@@ -57,7 +102,11 @@ export class PixelSelf {
             ? SIT_FRAMES
             : this.state === "walk"
               ? WALK_FRAMES
-              : TYPE_FRAMES;
+              : this.state === "read"
+                ? READ_FRAMES
+                : this.state === "piano"
+                  ? PIANO_FRAMES
+                  : TYPE_FRAMES;
       this.frame = (this.frame + 1) % count;
     }
 
@@ -71,7 +120,9 @@ export class PixelSelf {
       if ((dir > 0 && this.x >= this.walkTarget) || (dir < 0 && this.x <= this.walkTarget)) {
         this.x = this.walkTarget;
         this.y = this.walkToY;
-        if (this.afterWalk === "type") this.facing = 1;
+        if (this.afterWalk === "type" || this.afterWalk === "read" || this.afterWalk === "piano") {
+          this.facing = 1;
+        }
         this.enter(this.afterWalk);
       }
       return;
@@ -83,22 +134,28 @@ export class PixelSelf {
       return;
     }
 
-    this.y = GROUND_Y;
-    if (this.stateMs < this.holdMs) return;
+    if (this.state === "read") {
+      this.facing = 1;
+      this.y = CHAIR_Y;
+      return;
+    }
 
+    if (this.state === "piano") {
+      this.facing = 1;
+      this.y = PIANO_Y;
+      return;
+    }
+
+    this.y = GROUND_Y;
     if (this.state === "sit") {
       this.enter("idle");
       return;
     }
-
-    if (Math.random() < 0.4) {
-      this.enter("sit");
-      return;
-    }
+    if (this.stateMs < this.holdMs) return;
 
     let next = MIN_X + Math.random() * (MAX_X - MIN_X);
-    if (Math.abs(next - this.x) < 6) {
-      next = this.x < 26 ? MAX_X - 2 : MIN_X + 2;
+    if (Math.abs(next - this.x) < 8) {
+      next = this.x < (MIN_X + MAX_X) / 2 ? MAX_X - 2 : MIN_X + 2;
     }
     this.startWalk(next, "idle");
   }
@@ -107,18 +164,40 @@ export class PixelSelf {
     if (this.state === "idle") return this.frame % IDLE_FRAMES;
     if (this.state === "sit") return IDLE_FRAMES + (this.frame % SIT_FRAMES);
     if (this.state === "walk") return IDLE_FRAMES + SIT_FRAMES + (this.frame % WALK_FRAMES);
-    return IDLE_FRAMES + SIT_FRAMES + WALK_FRAMES + (this.frame % TYPE_FRAMES);
+    if (this.state === "type") {
+      return IDLE_FRAMES + SIT_FRAMES + WALK_FRAMES + (this.frame % TYPE_FRAMES);
+    }
+    if (this.state === "read") {
+      return IDLE_FRAMES + SIT_FRAMES + WALK_FRAMES + TYPE_FRAMES + (this.frame % READ_FRAMES);
+    }
+    return (
+      IDLE_FRAMES +
+      SIT_FRAMES +
+      WALK_FRAMES +
+      TYPE_FRAMES +
+      READ_FRAMES +
+      (this.frame % PIANO_FRAMES)
+    );
+  }
+
+  robePose(): { gy: number; pose: "stand" | "sit" | "type" | "read" | "piano" } {
+    if (this.state === "type") return { gy: 0, pose: "type" };
+    if (this.state === "read") return { gy: 0, pose: "read" };
+    if (this.state === "piano") return { gy: 0, pose: "piano" };
+    if (this.state === "sit") return { gy: 3, pose: "sit" };
+    if (this.state === "walk") return { gy: this.frame % 2, pose: "stand" };
+    return { gy: this.frame === 1 ? 1 : 0, pose: "stand" };
   }
 
   draw(ctx: CanvasRenderingContext2D, sheet: CanvasImageSource, scale: number, hairRow = 0) {
     const sx = this.sheetFrame() * FRAME_W;
     const sy = hairRow * FRAME_H;
-    const dx = Math.round(this.x) * scale;
-    const dy = Math.round(this.y) * scale;
+    const dx = (Math.round(this.x) - SELF_PAD_X) * scale;
+    const dy = (Math.round(this.y) - SELF_PAD_Y) * scale;
     const dw = FRAME_W * scale;
     const dh = FRAME_H * scale;
     ctx.save();
-    if (this.facing < 0) {
+    if (this.facing < 0 && this.state !== "piano") {
       ctx.translate(dx + dw, dy);
       ctx.scale(-1, 1);
       ctx.drawImage(sheet, sx, sy, FRAME_W, FRAME_H, 0, 0, dw, dh);
@@ -126,6 +205,28 @@ export class PixelSelf {
       ctx.drawImage(sheet, sx, sy, FRAME_W, FRAME_H, dx, dy, dw, dh);
     }
     ctx.restore();
+  }
+
+  private goToPiano() {
+    this.facing = 1;
+    if (Math.abs(this.x - PIANO_X) < 2) {
+      this.x = PIANO_X;
+      this.y = PIANO_Y;
+      this.enter("piano");
+      return;
+    }
+    this.startWalk(PIANO_X, "piano");
+  }
+
+  private goToChair() {
+    this.facing = 1;
+    if (Math.abs(this.x - CHAIR_X) < 2) {
+      this.x = CHAIR_X;
+      this.y = CHAIR_Y;
+      this.enter("read");
+      return;
+    }
+    this.startWalk(CHAIR_X, "read");
   }
 
   private goToDesk() {
@@ -143,7 +244,8 @@ export class PixelSelf {
     this.walkFromX = this.x;
     this.walkFromY = this.y;
     this.walkTarget = target;
-    this.walkToY = then === "type" ? DESK_Y : GROUND_Y;
+    this.walkToY =
+      then === "type" ? DESK_Y : then === "read" ? CHAIR_Y : then === "piano" ? PIANO_Y : GROUND_Y;
     this.afterWalk = then;
     this.enter("walk");
   }
@@ -153,7 +255,6 @@ export class PixelSelf {
     this.frame = 0;
     this.frameMs = 0;
     this.stateMs = 0;
-    if (state === "sit") this.holdMs = 2200;
-    else this.holdMs = 3200 + Math.random() * 1800;
+    this.holdMs = 1400 + Math.random() * 1600;
   }
 }

@@ -4,8 +4,8 @@ import { invoke } from "@tauri-apps/api/core";
 import selfUrl from "./assets/self.png";
 import catUrl from "./assets/cat.png";
 import { PixelCat } from "./cat";
-import { PixelSelf } from "./self";
-import { loadImage, SCALE, setupCanvas, windowSize } from "./render";
+import { PixelSelf, SELF_FRAME_H, SELF_FRAME_W, SELF_PAD_X, SELF_PAD_Y } from "./self";
+import { loadImage, ROOM_H, ROOM_W, SCALE, setupCanvas, windowSize } from "./render";
 import { drawThemedRoom } from "./room";
 import { recolorCat, recolorSelf } from "./recolor";
 import {
@@ -13,13 +13,16 @@ import {
   HAIR_STYLES,
   hairRow,
   loadTheme,
+  ROBE_PRESETS,
   ROOM_PRESETS,
   saveTheme,
   SELF_PRESETS,
   type Theme,
 } from "./theme";
+import { drawRobe } from "./robe";
+import { loadTodos, saveTodos, type Todo } from "./todos";
 
-const CUSTOMIZE_H = 396;
+const CUSTOMIZE_H = 520;
 
 function hideMenu(menu: HTMLElement) {
   menu.hidden = true;
@@ -50,6 +53,7 @@ async function handleAction(
 ) {
   if (action === "hide") {
     await setCustomizeMode(false);
+    document.querySelector<HTMLElement>("#todos")!.hidden = true;
     await getCurrentWindow().hide();
     return;
   }
@@ -83,10 +87,14 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     "wall",
     "floor",
     "furniture",
+    "rug",
+    "board",
     "hair",
     "skin",
     "shirt",
     "pants",
+    "robe",
+    "sash",
     "fur",
   ] as const;
   const inputs = Object.fromEntries(
@@ -104,13 +112,22 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     }
   };
 
+  const syncRobe = () => {
+    for (const button of document.querySelectorAll<HTMLButtonElement>("#styles-robe button")) {
+      const on = button.dataset.robe === "on";
+      button.classList.toggle("on", on === theme.robeOn);
+    }
+  };
+
   const apply = () => {
     saveTheme(theme);
     onChange();
     syncInputs();
     syncHair();
+    syncRobe();
   };
   syncHair();
+  syncRobe();
 
   for (const id of ids) {
     inputs[id].addEventListener("input", () => {
@@ -151,6 +168,23 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     apply();
   });
 
+  document.querySelector("#styles-robe")!.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest("button");
+    if (!button?.dataset.robe) return;
+    theme.robeOn = button.dataset.robe === "on";
+    apply();
+  });
+
+  document.querySelector("#presets-robe")!.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest("button");
+    const preset = ROBE_PRESETS.find((item) => item.id === button?.dataset.robePreset);
+    if (!preset) return;
+    theme.robe = preset.robe;
+    theme.sash = preset.sash;
+    theme.robeOn = true;
+    apply();
+  });
+
   document.querySelector("#presets-cat")!.addEventListener("click", (event) => {
     const button = (event.target as HTMLElement).closest("button");
     const preset = CAT_PRESETS.find((item) => item.id === button?.dataset.cat);
@@ -162,6 +196,83 @@ function bindCustomize(theme: Theme, onChange: () => void) {
   document.querySelector("#customize-done")!.addEventListener("click", () => {
     void setCustomizeMode(false);
   });
+}
+
+function bindTodos() {
+  const panel = document.querySelector<HTMLElement>("#todos")!;
+  const list = document.querySelector<HTMLUListElement>("#todo-list")!;
+  const form = document.querySelector<HTMLFormElement>("#todo-form")!;
+  const input = document.querySelector<HTMLInputElement>("#todo-input")!;
+  const close = document.querySelector<HTMLButtonElement>("#todo-close")!;
+  const hotspot = document.querySelector<HTMLButtonElement>("#board-hotspot")!;
+  let todos = loadTodos();
+
+  const render = () => {
+    list.replaceChildren();
+    if (todos.length === 0) {
+      const empty = document.createElement("li");
+      empty.className = "todo-empty";
+      empty.textContent = "Pin a note…";
+      list.append(empty);
+      return;
+    }
+    for (const todo of todos) {
+      const item = document.createElement("li");
+      if (todo.done) item.classList.add("done");
+      const check = document.createElement("button");
+      check.type = "button";
+      check.className = "check";
+      check.title = todo.done ? "Not done" : "Done";
+      check.setAttribute("aria-label", check.title);
+      const text = document.createElement("span");
+      text.textContent = todo.text;
+      const drop = document.createElement("button");
+      drop.type = "button";
+      drop.className = "drop";
+      drop.title = "Remove";
+      drop.setAttribute("aria-label", "Remove");
+      drop.textContent = "×";
+      check.addEventListener("click", () => {
+        todo.done = !todo.done;
+        saveTodos(todos);
+        render();
+      });
+      drop.addEventListener("click", () => {
+        todos = todos.filter((entry) => entry.id !== todo.id);
+        saveTodos(todos);
+        render();
+      });
+      item.append(check, text, drop);
+      list.append(item);
+    }
+  };
+
+  const setOpen = (on: boolean) => {
+    panel.hidden = !on;
+    if (on) input.focus();
+  };
+
+  hotspot.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setOpen(panel.hidden);
+  });
+
+  close.addEventListener("click", () => setOpen(false));
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    const todo: Todo = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, text, done: false };
+    todos = [todo, ...todos];
+    saveTodos(todos);
+    input.value = "";
+    render();
+    list.scrollTop = 0;
+  });
+
+  render();
+  return { close: () => setOpen(false) };
 }
 
 async function boot() {
@@ -184,6 +295,7 @@ async function boot() {
     selfSheet = recolorSelf(selfSrc, theme);
     catSheet = recolorCat(catSrc, theme);
   });
+  bindTodos();
 
   window.addEventListener("resize", () => {
     ctx = setupCanvas(canvas, window.devicePixelRatio);
@@ -219,7 +331,7 @@ async function boot() {
       return;
     }
     buddy.onClick();
-    buddyHotspot.title = buddy.typing ? "Idle" : "Sit and type";
+    buddyHotspot.title = buddy.nextClickLabel();
   });
 
   catHotspot.addEventListener("click", (event) => {
@@ -241,12 +353,15 @@ async function boot() {
     buddy.update(dt);
     cat.update(dt);
     const glow = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(now / 1400));
-    ctx.clearRect(0, 0, 256, 192);
+    ctx.clearRect(0, 0, ROOM_W * SCALE, ROOM_H * SCALE);
     drawThemedRoom(ctx, theme, glow);
     cat.draw(ctx, catSheet, SCALE);
     buddy.draw(ctx, selfSheet, SCALE, hairRow(theme.hairStyle));
-    buddyHotspot.style.left = `${Math.round(buddy.x) * SCALE}px`;
-    buddyHotspot.style.top = `${Math.round(buddy.y) * SCALE}px`;
+    drawRobe(ctx, buddy, SCALE, theme);
+    buddyHotspot.style.left = `${(Math.round(buddy.x) - SELF_PAD_X) * SCALE}px`;
+    buddyHotspot.style.top = `${(Math.round(buddy.y) - SELF_PAD_Y) * SCALE}px`;
+    buddyHotspot.style.width = `${SELF_FRAME_W * SCALE}px`;
+    buddyHotspot.style.height = `${SELF_FRAME_H * SCALE}px`;
     catHotspot.style.left = `${Math.round(cat.x) * SCALE}px`;
     catHotspot.style.top = `${Math.round(cat.y) * SCALE}px`;
     requestAnimationFrame(tick);
