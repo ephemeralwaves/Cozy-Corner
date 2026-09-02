@@ -17,6 +17,7 @@ import {
   ROOM_PRESETS,
   saveTheme,
   SELF_PRESETS,
+  WINDOW_PANES,
   type Theme,
 } from "./theme";
 import { drawRobe } from "./robe";
@@ -89,6 +90,7 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     "furniture",
     "rug",
     "board",
+    "glass",
     "hair",
     "skin",
     "shirt",
@@ -119,15 +121,23 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     }
   };
 
+  const syncWindow = () => {
+    for (const button of document.querySelectorAll<HTMLButtonElement>("#styles-window button")) {
+      button.classList.toggle("on", button.dataset.window === theme.windowPanes);
+    }
+  };
+
   const apply = () => {
     saveTheme(theme);
     onChange();
     syncInputs();
     syncHair();
     syncRobe();
+    syncWindow();
   };
   syncHair();
   syncRobe();
+  syncWindow();
 
   for (const id of ids) {
     inputs[id].addEventListener("input", () => {
@@ -146,6 +156,14 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     const preset = ROOM_PRESETS.find((item) => item.id === button?.dataset.preset);
     if (!preset) return;
     Object.assign(theme, preset.theme);
+    apply();
+  });
+
+  document.querySelector("#styles-window")!.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest("button");
+    const style = WINDOW_PANES.find((item) => item.id === button?.dataset.window);
+    if (!style) return;
+    theme.windowPanes = style.id;
     apply();
   });
 

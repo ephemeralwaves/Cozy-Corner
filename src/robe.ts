@@ -84,6 +84,19 @@ export function drawRobe(
     p(5, 9, 1, 2, stripe);
     p(11, 9, 1, 2, stripe);
     p(6, 11, 1, 1, lite);
+    if (pose === "read") {
+      const book = "#f5ecd6";
+      const spine = "#7a3e3a";
+      const leaf = "#fffaf0";
+      p(6, 12, 6, 4, book);
+      p(9, 12, 1, 4, spine);
+      if (buddy.frame % 2 === 1) {
+        p(10, 12, 3, 3, leaf);
+        p(11, 13, 1, 1, spine);
+      }
+      p(5, 12, 1, 1, theme.skin);
+      p(12, 12, 1, 1, theme.skin);
+    }
     ctx.restore();
     return;
   }

@@ -8,8 +8,6 @@ const GOLD = "#d4a840";
 const KEYS = "#f5eedc";
 const BLACK_KEY = "#48484e";
 const OUTLINE = "#3d2b1f";
-const GLASS = "#8ec8e8";
-const GLASS_LITE = "#b8e0f0";
 const SCREEN = "#60a8c4";
 const SCREEN_LITE = "#dceaf8";
 
@@ -46,8 +44,14 @@ export function drawThemedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow
   }
 
   px(ctx, 24, 4, 26, 18, frame);
-  px(ctx, 26, 6, 22, 14, GLASS);
-  px(ctx, 26, 6, 22, 6, GLASS_LITE);
+  if (theme.windowPanes === "desktop") {
+    ctx.clearRect(26 * SCALE, 6 * SCALE, 22 * SCALE, 14 * SCALE);
+  } else {
+    const glass = theme.glass;
+    const glassLite = mix(theme.glass, "#ffffff", 0.38);
+    px(ctx, 26, 6, 22, 14, glass);
+    px(ctx, 26, 6, 22, 6, glassLite);
+  }
   px(ctx, 36, 6, 2, 14, frame);
   px(ctx, 26, 12, 22, 1, frame);
 
@@ -128,7 +132,7 @@ export function drawThemedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow
   px(ctx, 0, 0, 1, ROOM_H, OUTLINE);
   px(ctx, ROOM_W - 1, 0, 1, ROOM_H, OUTLINE);
 
-  if (glow > 0) {
+  if (glow > 0 && theme.windowPanes !== "desktop") {
     ctx.save();
     ctx.globalAlpha = glow * 0.18;
     ctx.fillStyle = "#fff4c8";

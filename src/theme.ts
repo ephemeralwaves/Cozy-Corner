@@ -10,12 +10,21 @@ export const HAIR_STYLES = [
 
 export type HairStyle = (typeof HAIR_STYLES)[number]["id"];
 
+export const WINDOW_PANES = [
+  { id: "sky", label: "Sky" },
+  { id: "desktop", label: "Desktop" },
+] as const;
+
+export type WindowPanes = (typeof WINDOW_PANES)[number]["id"];
+
 export type Theme = {
   wall: string;
   floor: string;
   furniture: string;
   rug: string;
   board: string;
+  glass: string;
+  windowPanes: WindowPanes;
   hair: string;
   hairStyle: HairStyle;
   skin: string;
@@ -33,6 +42,8 @@ export const DEFAULT_THEME: Theme = {
   furniture: "#8b5a3c",
   rug: "#c45c5c",
   board: "#be9766",
+  glass: "#8ec8e8",
+  windowPanes: "sky",
   hair: "#4a3728",
   hairStyle: "short",
   skin: "#f0c8a0",
@@ -51,6 +62,10 @@ export function hairRow(style: HairStyle): number {
 
 function isHairStyle(value: unknown): value is HairStyle {
   return HAIR_STYLES.some((item) => item.id === value);
+}
+
+function isWindowPanes(value: unknown): value is WindowPanes {
+  return WINDOW_PANES.some((item) => item.id === value);
 }
 
 export const ROOM_PRESETS = [
@@ -119,10 +134,14 @@ export function loadTheme(): Theme {
     if (!raw) return { ...DEFAULT_THEME };
     const parsed = JSON.parse(raw) as Partial<Theme>;
     const hairStyle = isHairStyle(parsed.hairStyle) ? parsed.hairStyle : DEFAULT_THEME.hairStyle;
+    const windowPanes = isWindowPanes(parsed.windowPanes)
+      ? parsed.windowPanes
+      : DEFAULT_THEME.windowPanes;
     return {
       ...DEFAULT_THEME,
       ...parsed,
       hairStyle,
+      windowPanes,
       robeOn: parsed.robeOn === true,
     };
   } catch {

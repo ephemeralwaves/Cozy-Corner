@@ -10,7 +10,7 @@ body {
 
 body.customize {
   height: 520px;
-  background: #f6ead4;
+  background: transparent;
 }
 
 .widget {
@@ -39,6 +39,7 @@ body.customize {
   pointer-events: none;
   position: relative;
   z-index: 0;
+  background: transparent;
 }
 
 #radio-hotspot {
