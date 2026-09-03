@@ -1,4 +1,4 @@
-import { ROOF_PAD } from "./render";
+import { ROOM_PAD_LEFT, ROOF_PAD } from "./render";
 
 export type CatState = "idle" | "sit" | "walk" | "sleep";
 
@@ -81,7 +81,7 @@ export class PixelCat {
 
   draw(ctx: CanvasRenderingContext2D, sheet: CanvasImageSource, scale: number) {
     const sx = this.sheetFrame() * FRAME_W;
-    const dx = Math.round(this.x) * scale;
+    const dx = (Math.round(this.x) + ROOM_PAD_LEFT) * scale;
     const dy = Math.round(this.y) * scale;
     const dw = FRAME_W * scale;
     const dh = FRAME_H * scale;

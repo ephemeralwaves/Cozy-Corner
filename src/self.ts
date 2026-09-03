@@ -1,4 +1,4 @@
-import { ROOF_PAD } from "./render";
+import { ROOM_PAD_LEFT, ROOF_PAD } from "./render";
 import type { RoomStyle } from "./theme";
 
 export const SELF_FRAME_W = 18;
@@ -21,17 +21,22 @@ const BREW_FRAMES = 4;
 
 const MIN_X = 16;
 const MAX_X = 48;
-const DESK_X = 54;
+const DESK_X = 50;
 // Writing/typing anchor: high enough that arms rest on the tabletop.
 const DESK_Y = 15 + ROOF_PAD;
 const CHAIR_X = 29;
 // Raised by 1px so the seated sprite sits on the chair top.
 const CHAIR_Y = 19 + ROOF_PAD;
-const PIANO_X = 5;
+const PIANO_X = 2;
+const THEREMIN_X = 1;
 const PIANO_Y = 15 + ROOF_PAD;
 const GROUND_Y = 28 + ROOF_PAD;
 
 const DESK_STATES: SelfState[] = ["type", "brush", "brew"];
+
+function instrumentX(style: RoomStyle): number {
+  return style === "space" ? THEREMIN_X : PIANO_X;
+}
 
 function deskStateFor(style: RoomStyle): Exclude<SelfState, "walk"> {
   if (style === "dynasty") return "brush";
@@ -83,12 +88,14 @@ export class PixelSelf {
     if (this.typing) return "Idle";
     if (this.reading) {
       if (this.roomStyle === "modern") return "Sit and type";
+      if (this.roomStyle === "space") return "Sit at console";
       if (this.roomStyle === "enchanted") return "Sit and brew";
       return "Sit and write";
     }
     if (this.playingPiano) return "Read by the window";
     if (this.roomStyle === "dynasty") return "Play guzheng";
     if (this.roomStyle === "enchanted") return "Play harp";
+    if (this.roomStyle === "space") return "Play theremin";
     return "Play piano";
   }
 
@@ -188,6 +195,7 @@ export class PixelSelf {
 
     if (this.state === "piano") {
       this.facing = 1;
+      this.x = instrumentX(this.roomStyle);
       this.y = PIANO_Y;
       return;
     }
@@ -258,7 +266,7 @@ export class PixelSelf {
   draw(ctx: CanvasRenderingContext2D, sheet: CanvasImageSource, scale: number, hairRow = 0) {
     const sx = this.sheetFrame() * FRAME_W;
     const sy = hairRow * FRAME_H;
-    const dx = (Math.round(this.x) - SELF_PAD_X) * scale;
+    const dx = (Math.round(this.x) - SELF_PAD_X + ROOM_PAD_LEFT) * scale;
     const dy = (Math.round(this.y) - SELF_PAD_Y) * scale;
     const dw = FRAME_W * scale;
     const dh = FRAME_H * scale;
@@ -275,13 +283,14 @@ export class PixelSelf {
 
   private goToPiano() {
     this.facing = 1;
-    if (Math.abs(this.x - PIANO_X) < 2) {
-      this.x = PIANO_X;
+    const target = instrumentX(this.roomStyle);
+    if (Math.abs(this.x - target) < 2) {
+      this.x = target;
       this.y = PIANO_Y;
       this.enter("piano");
       return;
     }
-    this.startWalk(PIANO_X, "piano");
+    this.startWalk(target, "piano");
   }
 
   private goToChair() {

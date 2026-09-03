@@ -1,12 +1,16 @@
 export const ROOM_W = 80;
 export const ROOM_INNER_H = 48;
-/** Extra pixels above the room box for peaked roofs. */
+/** Extra pixels above the room box for peaked roofs / top wing. */
 export const ROOF_PAD = 18;
+/** Extra pixels around the room so Space extras sit outside the box. */
+export const ROOM_PAD_LEFT = 16;
+export const ROOM_PAD_RIGHT = 16;
+export const VIEW_W = ROOM_W + ROOM_PAD_LEFT + ROOM_PAD_RIGHT;
 export const ROOM_H = ROOM_INNER_H + ROOF_PAD;
 export const SCALE = 4;
 
 export function windowSize(): { width: number; height: number } {
-  return { width: ROOM_W * SCALE, height: ROOM_H * SCALE };
+  return { width: VIEW_W * SCALE, height: ROOM_H * SCALE };
 }
 
 export function setupCanvas(canvas: HTMLCanvasElement, dpr: number): CanvasRenderingContext2D {
@@ -14,7 +18,7 @@ export function setupCanvas(canvas: HTMLCanvasElement, dpr: number): CanvasRende
   const pixelRatio = dpr || 1;
   // Integer sprite scale on the backing store so 125%/150% DPI stays nearest-neighbor crisp.
   const backing = Math.max(SCALE, Math.round(SCALE * pixelRatio));
-  canvas.width = ROOM_W * backing;
+  canvas.width = VIEW_W * backing;
   canvas.height = ROOM_H * backing;
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;

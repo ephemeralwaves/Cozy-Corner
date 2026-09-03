@@ -1,3 +1,4 @@
+import { ROOM_PAD_LEFT } from "./render";
 import { mix, shade, type Theme } from "./theme";
 import { PixelSelf, SELF_FRAME_W, SELF_PAD_X, SELF_PAD_Y } from "./self";
 
@@ -31,7 +32,7 @@ export function drawRobe(
   const trim = mix(robe, "#ffffff", 0.62);
   const stripe = shade(robe, 0.52);
 
-  const dx = (Math.round(buddy.x) - SELF_PAD_X) * scale;
+  const dx = (Math.round(buddy.x) - SELF_PAD_X + ROOM_PAD_LEFT) * scale;
   const dy = (Math.round(buddy.y) - SELF_PAD_Y) * scale;
   const dw = SELF_FRAME_W * scale;
 

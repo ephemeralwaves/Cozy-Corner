@@ -1,4 +1,4 @@
-import { ROOM_INNER_H, ROOM_W, ROOF_PAD, SCALE } from "./render";
+import { ROOM_INNER_H, ROOM_PAD_LEFT, ROOM_PAD_RIGHT, ROOM_W, ROOF_PAD, SCALE } from "./render";
 import { mix, shade, type Theme } from "./theme";
 
 const PIANO = "#18181c";
@@ -24,10 +24,15 @@ const FLOOR_Y = 31;
 
 function px(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string) {
   ctx.fillStyle = color;
-  ctx.fillRect(x * SCALE, (y + ROOF_PAD) * SCALE, w * SCALE, h * SCALE);
+  ctx.fillRect((x + ROOM_PAD_LEFT) * SCALE, (y + ROOF_PAD) * SCALE, w * SCALE, h * SCALE);
 }
 
 function pxAbs(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string) {
+  ctx.fillStyle = color;
+  ctx.fillRect((x + ROOM_PAD_LEFT) * SCALE, y * SCALE, w * SCALE, h * SCALE);
+}
+
+function pxView(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string) {
   ctx.fillStyle = color;
   ctx.fillRect(x * SCALE, y * SCALE, w * SCALE, h * SCALE);
 }
@@ -38,6 +43,10 @@ function dot(ctx: CanvasRenderingContext2D, x: number, y: number, color: string)
 
 function dotAbs(ctx: CanvasRenderingContext2D, x: number, y: number, color: string) {
   pxAbs(ctx, x, y, 1, 1, color);
+}
+
+function dotView(ctx: CanvasRenderingContext2D, x: number, y: number, color: string) {
+  pxView(ctx, x, y, 1, 1, color);
 }
 
 function drawChineseRoof(ctx: CanvasRenderingContext2D, _theme: Theme) {
@@ -261,7 +270,7 @@ function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: numb
   px(ctx, 24, 4, 26, 18, frame);
   // Paper fill or desktop
   if (theme.windowPanes === "desktop") {
-    ctx.clearRect(26 * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
+    ctx.clearRect((26 + ROOM_PAD_LEFT) * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
   } else {
     const paper = mix(theme.glass, "#fffaea", 0.55);
     const paperDark = shade(paper, 0.88);
@@ -444,7 +453,7 @@ function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: numb
     ctx.save();
     ctx.globalAlpha = glow * 0.12;
     ctx.fillStyle = "#fff8d0";
-    ctx.fillRect(26 * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
+    ctx.fillRect((26 + ROOM_PAD_LEFT) * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
     ctx.restore();
   }
 }
@@ -577,7 +586,7 @@ function drawEnchantedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: nu
   px(ctx, 30, 3, 14, 2, frame);
   px(ctx, 33, 2, 8, 1, frame);
   if (theme.windowPanes === "desktop") {
-    ctx.clearRect(28 * SCALE, (6 + ROOF_PAD) * SCALE, 18 * SCALE, 14 * SCALE);
+    ctx.clearRect((28 + ROOM_PAD_LEFT) * SCALE, (6 + ROOF_PAD) * SCALE, 18 * SCALE, 14 * SCALE);
   } else {
     const glass = theme.glass;
     const glassLite = mix(theme.glass, "#ffffff", 0.35);
@@ -896,7 +905,7 @@ function drawEnchantedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: nu
     ctx.save();
     ctx.globalAlpha = glow * 0.14;
     ctx.fillStyle = "#d8e8ff";
-    ctx.fillRect(28 * SCALE, (6 + ROOF_PAD) * SCALE, 18 * SCALE, 14 * SCALE);
+    ctx.fillRect((28 + ROOM_PAD_LEFT) * SCALE, (6 + ROOF_PAD) * SCALE, 18 * SCALE, 14 * SCALE);
     ctx.restore();
   }
 }
@@ -905,16 +914,261 @@ function goldAccent(theme: Theme): string {
   return mix(theme.furniture, "#f0c840", 0.55);
 }
 
+function drawSpaceRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: number) {
+  const wall = theme.wall;
+  const wallShadow = shade(theme.wall, 0.82);
+  const floor = theme.floor;
+  const floorDark = shade(theme.floor, 0.72);
+  const metal = theme.furniture;
+  const metalDark = shade(metal, 0.65);
+  const metalLite = mix(metal, "#d8e4f0", 0.35);
+  const frame = mix(metal, OUTLINE, 0.4);
+  const silver = "#c8d0d8";
+  const silverLite = "#e8eef4";
+  const silverDark = "#8a949e";
+  const box = "#6b4a2e";
+  const boxDark = "#4a301c";
+  const boxLite = "#8a6240";
+
+  // Room shell
+  px(ctx, 0, 0, ROOM_W, ROOM_INNER_H, OUTLINE);
+  px(ctx, 1, 1, INNER_W, 30, wall);
+  px(ctx, 1, 24, INNER_W, 7, wallShadow);
+  px(ctx, 1, FLOOR_Y, INNER_W, ROOM_INNER_H - FLOOR_Y - 1, floor);
+  for (let y = FLOOR_Y + 1; y < ROOM_INNER_H - 1; y += 4) {
+    px(ctx, 1, y, INNER_W, 1, floorDark);
+  }
+  for (let x = 8; x < ROOM_W - 1; x += 8) {
+    px(ctx, x, FLOOR_Y, 1, ROOM_INNER_H - FLOOR_Y - 1, floorDark);
+  }
+
+  // Round porthole
+  px(ctx, 27, 5, 20, 16, frame);
+  px(ctx, 29, 4, 16, 18, frame);
+  px(ctx, 31, 3, 12, 2, frame);
+  px(ctx, 31, 19, 12, 2, frame);
+  if (theme.windowPanes === "desktop") {
+    ctx.clearRect((29 + ROOM_PAD_LEFT) * SCALE, (6 + ROOF_PAD) * SCALE, 16 * SCALE, 12 * SCALE);
+  } else {
+    const glass = mix(theme.glass, "#102038", 0.45);
+    const glassLite = mix(theme.glass, "#ffffff", 0.2);
+    px(ctx, 29, 6, 16, 12, glass);
+    px(ctx, 31, 6, 12, 4, glassLite);
+    // Distant stars
+    for (const [sx, sy] of [
+      [31, 8],
+      [34, 10],
+      [38, 7],
+      [41, 11],
+      [33, 14],
+      [42, 15],
+    ] as const) {
+      dot(ctx, sx, sy, mix(glassLite, "#ffffff", 0.7));
+    }
+  }
+
+  // Theremin — brown cabinet on legs, loop left, pitch rod right
+  px(ctx, 4, 22, 14, 6, boxDark);
+  px(ctx, 4, 20, 14, 5, box);
+  px(ctx, 4, 20, 14, 1, boxLite);
+  px(ctx, 4, 20, 1, 5, boxLite);
+  px(ctx, 17, 20, 1, 5, boxDark);
+  // Legs
+  px(ctx, 5, 26, 2, 7, boxDark);
+  px(ctx, 15, 26, 2, 7, boxDark);
+  dot(ctx, 6, 32, boxLite);
+  dot(ctx, 16, 32, boxLite);
+  // Volume loop — silver line out the left, horizontally
+  px(ctx, 1, 21, 3, 1, silver);
+  px(ctx, 1, 21, 1, 3, silverDark);
+  dot(ctx, 1, 21, silverLite);
+  // Pitch rod — silver vertical on the right
+  px(ctx, 16, 12, 1, 8, silver);
+  px(ctx, 16, 12, 1, 1, silverLite);
+  px(ctx, 16, 19, 1, 1, silverDark);
+
+  // Floating bean bag (centre)
+  const bag = mix(theme.rug, metal, 0.25);
+  const bagDark = shade(bag, 0.7);
+  const bagLite = mix(bag, "#d8e8f8", 0.35);
+  // Floor shadow
+  px(ctx, 30, 34, 14, 2, mix(floor, "#000000", 0.35));
+  px(ctx, 32, 35, 10, 1, mix(floor, "#000000", 0.45));
+  // Hovering blob
+  px(ctx, 30, 26, 14, 6, bagDark);
+  px(ctx, 28, 27, 18, 5, bag);
+  px(ctx, 29, 26, 16, 5, bag);
+  px(ctx, 31, 25, 12, 3, bagLite);
+  px(ctx, 32, 24, 10, 2, bagLite);
+  px(ctx, 33, 29, 8, 2, bagDark);
+  // Soft highlight
+  px(ctx, 34, 26, 4, 1, mix(bagLite, "#ffffff", 0.3));
+
+  // Command console (right)
+  px(ctx, 52, 22, 24, 4, metalDark);
+  px(ctx, 52, 20, 24, 3, metal);
+  px(ctx, 52, 20, 24, 1, metalLite);
+  // Angled screen bank
+  px(ctx, 54, 12, 20, 8, frame);
+  px(ctx, 55, 13, 18, 6, "#1a2438");
+  px(ctx, 56, 14, 7, 4, mix(theme.glass, "#40c8a0", 0.15));
+  px(ctx, 64, 14, 8, 4, mix(theme.glass, "#5088d0", 0.2));
+  dot(ctx, 58, 15, "#70f0c0");
+  dot(ctx, 67, 16, "#88c8ff");
+  px(ctx, 56, 14, 7, 1, mix(theme.glass, "#ffffff", 0.25));
+  // Console keys / lights
+  for (const kx of [54, 57, 60, 63, 66, 69]) {
+    px(ctx, kx, 21, 2, 1, kx % 3 === 0 ? "#50c878" : silverDark);
+  }
+  // Console legs / base
+  px(ctx, 54, 26, 3, 7, metalDark);
+  px(ctx, 71, 26, 3, 7, metalDark);
+  dot(ctx, 55, 32, metalLite);
+  dot(ctx, 72, 32, metalLite);
+
+  // Rug — faint ellipse
+  const rugC = theme.rug;
+  const rugD = shade(theme.rug, 0.72);
+  const rugL = mix(theme.rug, "#a8c8f0", 0.3);
+  px(ctx, 28, 39, 24, 4, rugD);
+  px(ctx, 26, 40, 28, 3, rugC);
+  px(ctx, 27, 39, 26, 4, rugC);
+  px(ctx, 28, 40, 24, 2, rugL);
+
+  px(ctx, 0, 0, ROOM_W, 1, OUTLINE);
+  px(ctx, 0, ROOM_INNER_H - 1, ROOM_W, 1, OUTLINE);
+  px(ctx, 0, 0, 1, ROOM_INNER_H, OUTLINE);
+  px(ctx, ROOM_W - 1, 0, 1, ROOM_INNER_H, OUTLINE);
+
+  // Sun chart last so it sits above the room rim and clear of the console
+  const chartFrame = mix(metal, OUTLINE, 0.25);
+  const chartFrameLite = mix(metal, "#d0dce8", 0.3);
+  const sky = "#142048";
+  const sun = "#f0c830";
+  px(ctx, 52, 0, 24, 11, chartFrame);
+  px(ctx, 52, 0, 24, 1, chartFrameLite);
+  px(ctx, 53, 1, 22, 9, sky);
+  const sunOx = 53 + Math.floor((22 - 9) / 2) - 1;
+  const cells: [number, number][] = [
+    [2, 1],
+    [5, 1],
+    [8, 1],
+    [3, 2],
+    [5, 2],
+    [7, 2],
+    [4, 3],
+    [6, 3],
+    [3, 4],
+    [7, 4],
+    [1, 5],
+    [2, 5],
+    [8, 5],
+    [9, 5],
+    [3, 6],
+    [7, 6],
+    [4, 7],
+    [6, 7],
+    [3, 8],
+    [5, 8],
+    [7, 8],
+    [2, 9],
+    [5, 9],
+    [8, 9],
+  ];
+  for (const [gx, gy] of cells) {
+    dot(ctx, sunOx + gx, gy, sun);
+  }
+  const twinkle = "#f0c830";
+  const sparkle: [number, number][] = [
+    [2, 1],
+    [1, 2],
+    [3, 2],
+    [2, 3],
+  ];
+  for (const [ox, oy] of [
+    [52, 0],
+    [54, 5],
+    [68, 2],
+    [71, 6],
+  ] as const) {
+    for (const [gx, gy] of sparkle) {
+      dot(ctx, ox + gx, oy + gy, twinkle);
+    }
+  }
+
+  if (glow > 0 && theme.windowPanes !== "desktop") {
+    ctx.save();
+    ctx.globalAlpha = glow * 0.14;
+    ctx.fillStyle = "#c8e0ff";
+    ctx.fillRect((29 + ROOM_PAD_LEFT) * SCALE, (6 + ROOF_PAD) * SCALE, 16 * SCALE, 12 * SCALE);
+    ctx.restore();
+  }
+
+  drawSpaceShipExtras(ctx, glow);
+}
+
+function drawSpaceShipExtras(ctx: CanvasRenderingContext2D, glow: number) {
+  const hull = "#e8eaee";
+  const hullLite = "#f8fafc";
+  const wing = "#9aa2ac";
+  const wingLite = "#c8ced6";
+  const flameHi = "#fff8d8";
+  const flameMid = "#ffe24a";
+  const flameLo = "#f07020";
+  const boxL = ROOM_PAD_LEFT;
+  const boxR = ROOM_PAD_LEFT + ROOM_W;
+  const boxT = ROOF_PAD;
+  const boxB = ROOF_PAD + ROOM_INNER_H;
+  const cy = Math.floor((boxT + boxB) / 2);
+
+  // Nose cone — left of the box, full room height at the base
+  for (let x = 0; x < boxL; x++) {
+    const t = x / Math.max(1, boxL - 1);
+    const top = Math.round(cy + (boxT - cy) * t);
+    const bot = Math.round(cy + (boxB - 1 - cy) * t);
+    pxView(ctx, x, top, 1, bot - top + 1, t < 0.18 ? hullLite : hull);
+  }
+
+  // Top wing — right triangle, 90° at the far-right of the room
+  const rightX = boxR - 1;
+  const tipY = 1;
+  const leftBase = boxL + 42;
+  for (let y = tipY; y < boxT; y++) {
+    const t = (y - tipY) / Math.max(1, boxT - 1 - tipY);
+    const left = Math.round(rightX + (leftBase - rightX) * t);
+    pxView(ctx, left, y, rightX - left + 1, 1, t < 0.2 ? wingLite : wing);
+  }
+
+  // Exhaust — jagged fire off the whole right face
+  const flicker = Math.round(glow * 3);
+  for (let y = boxT; y < boxB; y++) {
+    const fromMid = Math.abs(y - cy);
+    const pulse = (y * 5 + flicker * 3) % 7;
+    const len = Math.max(3, 14 - Math.floor(fromMid / 2.4) + (pulse < 3 ? pulse : 1 - pulse));
+    const cap = Math.min(len, ROOM_PAD_RIGHT - 1);
+    const x = boxR;
+    pxView(ctx, x, y, Math.min(2, cap), 1, flameHi);
+    if (cap > 2) pxView(ctx, x + 2, y, Math.min(4, cap - 2), 1, flameMid);
+    if (cap > 6) pxView(ctx, x + 6, y, cap - 6, 1, flameLo);
+    dotView(ctx, x + cap, y, flameLo);
+  }
+}
+
 export function drawDeskStool(ctx: CanvasRenderingContext2D, theme: Theme) {
   const wood = theme.furniture;
   const woodDark = shade(wood, 0.68);
   const woodLite = mix(wood, "#fff8e8", 0.25);
   if (theme.roomStyle === "dynasty") {
-    drawStool(ctx, 54, 27, wood, woodDark, woodLite);
+    drawStool(ctx, 53, 27, wood, woodDark, woodLite);
+    return;
+  }
+  if (theme.roomStyle === "space") {
+    const metal = theme.furniture;
+    drawStool(ctx, 53, 27, metal, shade(metal, 0.65), mix(metal, "#d8e4f0", 0.35));
     return;
   }
   const seat = mix(wood, "#5a3a28", 0.18);
-  drawStool(ctx, 54, 27, seat, shade(seat, 0.72), mix(seat, "#fff8e8", 0.22));
+  drawStool(ctx, 53, 27, seat, shade(seat, 0.72), mix(seat, "#fff8e8", 0.22));
 }
 
 function drawStool(
@@ -947,6 +1201,10 @@ export function drawThemedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow
     drawEnchantedRoom(ctx, theme, glow);
     return;
   }
+  if (theme.roomStyle === "space") {
+    drawSpaceRoom(ctx, theme, glow);
+    return;
+  }
   const wall = theme.wall;
   const wallShadow = shade(theme.wall, 0.88);
   const floor = theme.floor;
@@ -968,7 +1226,7 @@ export function drawThemedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow
 
   px(ctx, 24, 4, 26, 18, frame);
   if (theme.windowPanes === "desktop") {
-    ctx.clearRect(26 * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
+    ctx.clearRect((26 + ROOM_PAD_LEFT) * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
   } else {
     const glass = theme.glass;
     const glassLite = mix(theme.glass, "#ffffff", 0.38);
@@ -1067,7 +1325,7 @@ export function drawThemedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow
     ctx.save();
     ctx.globalAlpha = glow * 0.18;
     ctx.fillStyle = "#fff4c8";
-    ctx.fillRect(26 * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
+    ctx.fillRect((26 + ROOM_PAD_LEFT) * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
     ctx.restore();
   }
 }

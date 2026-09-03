@@ -14,6 +14,7 @@ export const ROOM_STYLES = [
   { id: "modern", label: "Modern" },
   { id: "dynasty", label: "Dynasty" },
   { id: "enchanted", label: "Enchanted" },
+  { id: "space", label: "Space" },
 ] as const;
 
 export type RoomStyle = (typeof ROOM_STYLES)[number]["id"];
@@ -112,6 +113,18 @@ export const ROOM_PRESETS = [
       rug: "#5a8878",
       board: "#c4a878",
       glass: "#98b8d8",
+    },
+  },
+  {
+    id: "space",
+    label: "Orbit",
+    theme: {
+      wall: "#2a3048",
+      floor: "#dce2ea",
+      furniture: "#4a5568",
+      rug: "#3a5080",
+      board: "#1a2040",
+      glass: "#6a90c8",
     },
   },
 ] as const;

@@ -6,7 +6,7 @@ import catUrl from "./assets/cat.png";
 import dogUrl from "./assets/dog.png";
 import { PixelCat } from "./cat";
 import { PixelSelf, SELF_FRAME_H, SELF_FRAME_W, SELF_PAD_X, SELF_PAD_Y } from "./self";
-import { loadImage, ROOM_H, ROOM_W, SCALE, setupCanvas, windowSize } from "./render";
+import { loadImage, ROOM_H, ROOM_PAD_LEFT, ROOF_PAD, SCALE, setupCanvas, VIEW_W, windowSize } from "./render";
 import { drawDeskStool, drawThemedRoom } from "./room";
 import { recolorCat, recolorSelf } from "./recolor";
 import {
@@ -264,10 +264,17 @@ async function boot() {
   const hotspot = document.querySelector<HTMLButtonElement>("#radio-hotspot")!;
   const buddyHotspot = document.querySelector<HTMLButtonElement>("#buddy-hotspot")!;
   const catHotspot = document.querySelector<HTMLButtonElement>("#cat-hotspot")!;
+  const boardHotspot = document.querySelector<HTMLButtonElement>("#board-hotspot")!;
   const notes = document.querySelector<HTMLElement>("#notes")!;
   const playing = { value: false };
   const theme = loadTheme();
   let ctx = setupCanvas(canvas, window.devicePixelRatio);
+  const { width, height } = windowSize();
+  try {
+    await getCurrentWindow().setSize(new LogicalSize(width, height));
+  } catch {
+    /* browser preview has no Tauri window */
+  }
   const [selfSrc, catSrc, dogSrc] = await Promise.all([
     loadImage(selfUrl),
     loadImage(catUrl),
@@ -345,18 +352,29 @@ async function boot() {
     buddy.update(dt);
     pet.update(dt);
     const glow = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(now / 1400));
-    ctx.clearRect(0, 0, ROOM_W * SCALE, ROOM_H * SCALE);
+    ctx.clearRect(0, 0, VIEW_W * SCALE, ROOM_H * SCALE);
     drawThemedRoom(ctx, theme, glow);
     drawDeskStool(ctx, theme);
     pet.draw(ctx, petSheet, SCALE);
     buddy.draw(ctx, selfSheet, SCALE, hairRow(theme.hairStyle));
     drawRobe(ctx, buddy, SCALE, theme);
-    buddyHotspot.style.left = `${(Math.round(buddy.x) - SELF_PAD_X) * SCALE}px`;
+    buddyHotspot.style.left = `${(Math.round(buddy.x) - SELF_PAD_X + ROOM_PAD_LEFT) * SCALE}px`;
     buddyHotspot.style.top = `${(Math.round(buddy.y) - SELF_PAD_Y) * SCALE}px`;
     buddyHotspot.style.width = `${SELF_FRAME_W * SCALE}px`;
     buddyHotspot.style.height = `${SELF_FRAME_H * SCALE}px`;
-    catHotspot.style.left = `${Math.round(pet.x) * SCALE}px`;
+    catHotspot.style.left = `${(Math.round(pet.x) + ROOM_PAD_LEFT) * SCALE}px`;
     catHotspot.style.top = `${Math.round(pet.y) * SCALE}px`;
+    if (theme.roomStyle === "space") {
+      boardHotspot.style.left = `${(52 + ROOM_PAD_LEFT) * SCALE}px`;
+      boardHotspot.style.top = `${ROOF_PAD * SCALE}px`;
+      boardHotspot.style.width = `${24 * SCALE}px`;
+      boardHotspot.style.height = `${11 * SCALE}px`;
+    } else {
+      boardHotspot.style.left = `${(59 + ROOM_PAD_LEFT) * SCALE}px`;
+      boardHotspot.style.top = `${(ROOF_PAD + 2) * SCALE}px`;
+      boardHotspot.style.width = `${14 * SCALE}px`;
+      boardHotspot.style.height = `${11 * SCALE}px`;
+    }
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);

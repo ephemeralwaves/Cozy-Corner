@@ -4,7 +4,7 @@ body {
   padding: 0;
   overflow: hidden;
   background: transparent;
-  width: 320px;
+  width: 448px;
   height: 264px;
 }
 
@@ -14,7 +14,7 @@ body.customize {
 }
 
 .widget {
-  width: 320px;
+  width: 448px;
   height: 264px;
   position: relative;
 }
@@ -32,7 +32,7 @@ body.customize {
 
 #room {
   display: block;
-  width: 320px;
+  width: 448px;
   height: 264px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
@@ -44,7 +44,7 @@ body.customize {
 
 #radio-hotspot {
   position: absolute;
-  left: 12px;
+  left: 76px;
   top: 108px;
   width: 68px;
   height: 56px;
@@ -58,7 +58,7 @@ body.customize {
 
 #board-hotspot {
   position: absolute;
-  left: 236px;
+  left: 300px;
   top: 80px;
   width: 56px;
   height: 44px;
@@ -72,7 +72,7 @@ body.customize {
 
 #buddy-hotspot {
   position: absolute;
-  left: 96px;
+  left: 160px;
   top: 184px;
   width: 72px;
   height: 80px;
@@ -86,7 +86,7 @@ body.customize {
 
 #cat-hotspot {
   position: absolute;
-  left: 96px;
+  left: 160px;
   top: 160px;
   width: 64px;
   height: 64px;
@@ -100,7 +100,7 @@ body.customize {
 
 .notes {
   position: absolute;
-  left: 36px;
+  left: 100px;
   top: 84px;
   z-index: 2;
   color: #3d2b1f;
@@ -161,6 +161,7 @@ body.customize {
 .customize-panel {
   box-sizing: border-box;
   width: 320px;
+  margin-left: 64px;
   height: 328px;
   padding: 8px 10px;
   background: #f6ead4;
@@ -273,6 +274,11 @@ body.customize {
 .presets button[data-preset="dynasty"] {
   background: #c83040;
   color: #f5e8d0;
+}
+
+.presets button[data-preset="space"] {
+  background: #2a3048;
+  color: #f6ead4;
 }
 
 .presets button[data-self="default"] {
