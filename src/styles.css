@@ -5,17 +5,17 @@ body {
   overflow: hidden;
   background: transparent;
   width: 320px;
-  height: 192px;
+  height: 264px;
 }
 
 body.customize {
-  height: 520px;
+  height: 592px;
   background: transparent;
 }
 
 .widget {
   width: 320px;
-  height: 192px;
+  height: 264px;
   position: relative;
 }
 
@@ -33,7 +33,7 @@ body.customize {
 #room {
   display: block;
   width: 320px;
-  height: 192px;
+  height: 264px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   pointer-events: none;
@@ -45,7 +45,7 @@ body.customize {
 #radio-hotspot {
   position: absolute;
   left: 12px;
-  top: 36px;
+  top: 108px;
   width: 68px;
   height: 56px;
   z-index: 6;
@@ -59,7 +59,7 @@ body.customize {
 #board-hotspot {
   position: absolute;
   left: 236px;
-  top: 8px;
+  top: 80px;
   width: 56px;
   height: 44px;
   z-index: 5;
@@ -202,7 +202,7 @@ body.customize {
 #buddy-hotspot {
   position: absolute;
   left: 96px;
-  top: 112px;
+  top: 184px;
   width: 72px;
   height: 80px;
   z-index: 7;
@@ -216,7 +216,7 @@ body.customize {
 #cat-hotspot {
   position: absolute;
   left: 96px;
-  top: 88px;
+  top: 160px;
   width: 64px;
   height: 64px;
   z-index: 3;
@@ -230,7 +230,7 @@ body.customize {
 .notes {
   position: absolute;
   left: 36px;
-  top: 12px;
+  top: 84px;
   z-index: 2;
   color: #3d2b1f;
   font-size: 13px;
@@ -453,6 +453,24 @@ body.customize {
 
 .presets button[data-cat="cream"] {
   background: #e8d0a8;
+}
+
+.presets button[data-dog="golden"] {
+  background: #d4a05a;
+}
+
+.presets button[data-dog="brown"] {
+  background: #8b5a3c;
+  color: #f6ead4;
+}
+
+.presets button[data-dog="black"] {
+  background: #2e2a28;
+  color: #f6ead4;
+}
+
+.presets button[data-dog="white"] {
+  background: #e8e0d4;
 }
 
 #customize-done {

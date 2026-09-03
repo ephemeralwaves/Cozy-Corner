@@ -24,6 +24,13 @@ export const WINDOW_PANES = [
 
 export type WindowPanes = (typeof WINDOW_PANES)[number]["id"];
 
+export const PET_KINDS = [
+  { id: "cat", label: "Cat" },
+  { id: "dog", label: "Dog" },
+] as const;
+
+export type PetKind = (typeof PET_KINDS)[number]["id"];
+
 export type Theme = {
   wall: string;
   floor: string;
@@ -42,6 +49,7 @@ export type Theme = {
   robe: string;
   sash: string;
   fur: string;
+  petKind: PetKind;
 };
 
 export const DEFAULT_THEME: Theme = {
@@ -62,6 +70,7 @@ export const DEFAULT_THEME: Theme = {
   robe: "#7aa6e8",
   sash: "#f0c430",
   fur: "#e09a4a",
+  petKind: "cat",
 };
 
 export function hairRow(style: HairStyle): number {
@@ -79,6 +88,10 @@ function isWindowPanes(value: unknown): value is WindowPanes {
 
 function isRoomStyle(value: unknown): value is RoomStyle {
   return ROOM_STYLES.some((item) => item.id === value);
+}
+
+function isPetKind(value: unknown): value is PetKind {
+  return PET_KINDS.some((item) => item.id === value);
 }
 
 export const ROOM_PRESETS = [
@@ -109,6 +122,13 @@ export const CAT_PRESETS = [
   { id: "gray", label: "Gray", fur: "#9aa0a8" },
   { id: "black", label: "Black", fur: "#3a3230" },
   { id: "cream", label: "Cream", fur: "#e8d0a8" },
+] as const;
+
+export const DOG_PRESETS = [
+  { id: "golden", label: "Golden", fur: "#d4a05a" },
+  { id: "brown", label: "Brown", fur: "#8b5a3c" },
+  { id: "black", label: "Black", fur: "#2e2a28" },
+  { id: "white", label: "White", fur: "#e8e0d4" },
 ] as const;
 
 export const SRC = {
@@ -152,12 +172,14 @@ export function loadTheme(): Theme {
       ? parsed.windowPanes
       : DEFAULT_THEME.windowPanes;
     const roomStyle = isRoomStyle(parsed.roomStyle) ? parsed.roomStyle : DEFAULT_THEME.roomStyle;
+    const petKind = isPetKind(parsed.petKind) ? parsed.petKind : DEFAULT_THEME.petKind;
     return {
       ...DEFAULT_THEME,
       ...parsed,
       hairStyle,
       windowPanes,
       roomStyle,
+      petKind,
       robeOn: parsed.robeOn === true,
     };
   } catch {

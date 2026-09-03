@@ -648,6 +648,126 @@ function drawCatSheet() {
   return sheet;
 }
 
+function drawDog({ bounce = 0, sit = false, walk = 0, blink = false, sleep = false, tail = 0 } = {}) {
+  const p = pixels(16, 16);
+  const gy = sleep ? 2 : sit ? 1 : bounce;
+
+  if (sleep) {
+    // Curled loaf — head tucked, no dangling legs
+    rect(p, 3, 10, 10, 4, C.fur);
+    rect(p, 4, 11, 8, 2, C.fur);
+    // Head resting on body
+    rect(p, 10, 8, 4, 4, C.fur);
+    // Tiny muzzle accent only
+    set(p, 12, 10, C.belly);
+    set(p, 13, 10, C.belly);
+    set(p, 14, 9, C.eye); // nose
+    set(p, 11, 9, C.eye);
+    // Pointed ear
+    set(p, 10, 7, C.fur);
+    // Tail tip only, no limb protrusion
+    set(p, 2, 11 + (tail > 0 ? -1 : 0), C.fur);
+    set(p, 2, 12, C.fur);
+    return p;
+  }
+
+  if (sit) {
+    // Full fur sit — mostly body color, tiny light accents only
+    // Solid rear haunches / back
+    rect(p, 1, 7 + gy, 8, 6, C.fur);
+    rect(p, 2, 8 + gy, 7, 4, C.fur);
+    // Slight far-side depth on rear (still fur family)
+    rect(p, 1, 11 + gy, 2, 2, C.furDark);
+    // Thick upright torso / back continuing into chest
+    rect(p, 5, 4 + gy, 5, 7, C.fur);
+    rect(p, 4, 6 + gy, 2, 5, C.fur);
+    // Tiny belly hint only
+    set(p, 7, 9 + gy, C.belly);
+    set(p, 8, 9 + gy, C.belly);
+    // Head + pointed ear
+    rect(p, 8, 2 + gy, 4, 4, C.fur);
+    set(p, 8, 1 + gy, C.fur);
+    set(p, 8, gy, C.fur);
+    // Snout — mostly fur, light only on underside
+    rect(p, 11, 3 + gy, 3, 2, C.fur);
+    set(p, 11, 4 + gy, C.belly);
+    set(p, 12, 4 + gy, C.belly);
+    set(p, 13, 3 + gy, C.eye);
+    if (blink) rect(p, 10, 3 + gy, 2, 1, C.eye);
+    else set(p, 10, 3 + gy, C.eye);
+    // Front paws under chest
+    rect(p, 7, 11 + gy, 2, 3, C.fur);
+    set(p, 8, 13 + gy, C.fur);
+    rect(p, 5, 12 + gy, 2, 2, C.furDark);
+    // Tail up behind
+    set(p, 1, 6 + gy + (tail > 0 ? -1 : 0), C.fur);
+    set(p, 1, 7 + gy, C.fur);
+    return p;
+  }
+
+  const leg = walk;
+  // Tail curves up at the rear
+  set(p, 1, 5 + gy + (tail > 0 ? -1 : 0), C.fur);
+  set(p, 1, 6 + gy, C.fur);
+  set(p, 2, 6 + gy, C.fur);
+
+  // Torso — x 2..9
+  rect(p, 2, 6 + gy, 8, 4, C.fur);
+  rect(p, 8, 7 + gy, 2, 3, C.belly);
+  set(p, 8, 8 + gy, C.furDark);
+
+  // Head
+  rect(p, 8, 3 + gy, 4, 4, C.fur);
+  set(p, 8, 2 + gy, C.fur);
+  set(p, 8, 1 + gy, C.fur);
+
+  // Long snout pointing right
+  rect(p, 11, 4 + gy, 3, 3, C.fur);
+  rect(p, 11, 5 + gy, 3, 2, C.belly);
+  set(p, 13, 4 + gy, C.eye);
+  if (blink) rect(p, 10, 4 + gy, 2, 1, C.eye);
+  else set(p, 10, 4 + gy, C.eye);
+
+  // Legs centered under torso (x 2..9), not past the chest into the snout
+  // near = fur, far = furDark; small foot pad one px forward
+  const backNearX = 3 + (leg > 0 ? 1 : 0);
+  const frontNearX = 6 + (leg < 0 ? 1 : 0);
+  const backFarX = 4;
+  const frontFarX = 7;
+
+  rect(p, backNearX, 10 + gy, 2, 3, C.fur);
+  set(p, backNearX + 1, 13 + gy, C.fur);
+
+  rect(p, backFarX, 10 + gy, 2, 3, C.furDark);
+  set(p, backFarX + 1, 13 + gy, C.furDark);
+
+  rect(p, frontNearX, 10 + gy, 2, 3, C.fur);
+  set(p, frontNearX + 1, 13 + gy, C.fur);
+
+  rect(p, frontFarX, 10 + gy, 2, 3, C.furDark);
+  set(p, frontFarX + 1, 13 + gy, C.furDark);
+
+  return p;
+}
+
+function drawDogSheet() {
+  const sheet = pixels(160, 16);
+  const frames = [
+    drawDog({ bounce: 0, tail: 0 }),
+    drawDog({ bounce: 1, tail: 1 }),
+    drawDog({ bounce: 0, tail: 0 }),
+    drawDog({ bounce: 0, tail: 1, blink: true }),
+    drawDog({ sit: true, tail: 0 }),
+    drawDog({ sit: true, tail: 1, blink: true }),
+    drawDog({ bounce: 0, walk: 1, tail: 1 }),
+    drawDog({ bounce: 1, walk: -1, tail: 0 }),
+    drawDog({ sleep: true, tail: 0 }),
+    drawDog({ sleep: true, tail: 1 }),
+  ];
+  frames.forEach((f, i) => blit(sheet, f, i * 16, 0));
+  return sheet;
+}
+
 function nearestScale(src, scale) {
   const dst = pixels(src.w * scale, src.h * scale);
   for (let y = 0; y < dst.h; y++) {
@@ -679,9 +799,11 @@ function makeIco(png32) {
 const room = drawRoom();
 const self = drawSheet();
 const cat = drawCatSheet();
+const dog = drawDogSheet();
 savePng("src/assets/room.png", room);
 savePng("src/assets/self.png", self);
 savePng("src/assets/cat.png", cat);
+savePng("src/assets/dog.png", dog);
 
 const iconSrc = pixels(32, 32, [0, 0, 0, 0]);
 blit(iconSrc, nearestScale(room, 1), -24, -8);
@@ -697,4 +819,4 @@ savePng("src-tauri/icons/128x128@2x.png", icon256);
 savePng("src-tauri/icons/icon.png", icon32);
 writeFileSync(join(root, "src-tauri/icons/icon.ico"), makeIco(encodePng(icon32.w, icon32.h, icon32.rgba)));
 
-console.log("Wrote room, self, cat, and tray icons.");
+console.log("Wrote room, self, cat, dog, and tray icons.");

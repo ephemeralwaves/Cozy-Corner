@@ -1,4 +1,4 @@
-import { ROOM_H, ROOM_W, SCALE } from "./render";
+import { ROOM_INNER_H, ROOM_W, ROOF_PAD, SCALE } from "./render";
 import { mix, shade, type Theme } from "./theme";
 
 const PIANO = "#18181c";
@@ -24,11 +24,98 @@ const FLOOR_Y = 31;
 
 function px(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string) {
   ctx.fillStyle = color;
+  ctx.fillRect(x * SCALE, (y + ROOF_PAD) * SCALE, w * SCALE, h * SCALE);
+}
+
+function pxAbs(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string) {
+  ctx.fillStyle = color;
   ctx.fillRect(x * SCALE, y * SCALE, w * SCALE, h * SCALE);
 }
 
 function dot(ctx: CanvasRenderingContext2D, x: number, y: number, color: string) {
   px(ctx, x, y, 1, 1, color);
+}
+
+function dotAbs(ctx: CanvasRenderingContext2D, x: number, y: number, color: string) {
+  pxAbs(ctx, x, y, 1, 1, color);
+}
+
+function drawChineseRoof(ctx: CanvasRenderingContext2D, _theme: Theme) {
+  // Terracotta peaked roof with curved eaves — sits flush on the room box
+  const ink = "#2c2438";
+  const dark = "#b85028";
+  const mid = "#d87038";
+  const lite = "#e8a858";
+  const hi = "#fff8f0";
+  const cx = Math.floor(ROOM_W / 2);
+  const baseY = ROOF_PAD - 1; // rests on box top (y = ROOF_PAD in room space)
+
+  // Decorative finial
+  pxAbs(ctx, cx, 0, 1, 1, ink);
+  pxAbs(ctx, cx, 1, 1, 2, ink);
+  dotAbs(ctx, cx, 1, hi);
+
+  // Continuous peaked body — each row widens with flying-eave flare at the bottom
+  // so left/right ends connect all the way to the upswept tips (no gaps)
+  for (let y = 2; y <= baseY; y++) {
+    const t = (y - 2) / Math.max(1, baseY - 2);
+    let half = Math.floor(2 + t * (cx - 2));
+    // Extra outward flare in the lower third for curved eaves
+    if (y >= baseY - 5) {
+      half += (y - (baseY - 5)) * 2;
+    }
+    half = Math.min(cx, half);
+    const left = cx - half;
+    const right = cx + half;
+    const w = right - left + 1;
+
+    let fill = lite;
+    if (y >= baseY - 2) fill = dark;
+    else if (y >= baseY - 6) fill = mid;
+    else fill = lite;
+
+    pxAbs(ctx, left, y, w, 1, fill);
+    dotAbs(ctx, left, y, ink);
+    dotAbs(ctx, right, y, ink);
+
+    if (y >= 3 && y <= baseY - 8 && y % 2 === 0) {
+      for (let x = left + 3; x < right - 2; x += 5) {
+        dotAbs(ctx, x, y, hi);
+      }
+    }
+  }
+
+  // Ridge lines from peak down the hips
+  const ridgeLen = baseY - 3;
+  for (let i = 0; i < ridgeLen; i++) {
+    const y = 2 + i;
+    const inset = Math.floor(i * ((cx - 4) / Math.max(1, ridgeLen - 1)));
+    dotAbs(ctx, cx - inset, y, ink);
+    dotAbs(ctx, cx + inset, y, ink);
+  }
+
+  // Upswept eave tips — connected into the flared lower rows
+  const tipY = baseY - 3;
+  pxAbs(ctx, 0, tipY, 2, 1, lite);
+  pxAbs(ctx, 0, tipY + 1, 3, 1, mid);
+  pxAbs(ctx, 0, tipY + 2, 4, 1, dark);
+  pxAbs(ctx, 0, tipY + 3, 5, 1, dark);
+  dotAbs(ctx, 0, tipY, ink);
+  dotAbs(ctx, 0, tipY + 1, ink);
+  dotAbs(ctx, 0, tipY + 2, ink);
+  dotAbs(ctx, 0, tipY + 3, ink);
+
+  pxAbs(ctx, ROOM_W - 2, tipY, 2, 1, lite);
+  pxAbs(ctx, ROOM_W - 3, tipY + 1, 3, 1, mid);
+  pxAbs(ctx, ROOM_W - 4, tipY + 2, 4, 1, dark);
+  pxAbs(ctx, ROOM_W - 5, tipY + 3, 5, 1, dark);
+  dotAbs(ctx, ROOM_W - 1, tipY, ink);
+  dotAbs(ctx, ROOM_W - 1, tipY + 1, ink);
+  dotAbs(ctx, ROOM_W - 1, tipY + 2, ink);
+  dotAbs(ctx, ROOM_W - 1, tipY + 3, ink);
+
+  // Flat underside spanning the full width — connects both eaves to the box
+  pxAbs(ctx, 0, baseY, ROOM_W, 1, ink);
 }
 
 function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: number) {
@@ -41,17 +128,20 @@ function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: numb
   const woodLite = mix(wood, "#fff8e8", 0.25);
   const frame = mix(wood, OUTLINE, 0.4);
 
-  // === BACKGROUND ===
-  px(ctx, 0, 0, ROOM_W, ROOM_H, OUTLINE);
+  // Roof perched above the room box
+  drawChineseRoof(ctx, theme);
+
+  // === ROOM BOX ===
+  px(ctx, 0, 0, ROOM_W, ROOM_INNER_H, OUTLINE);
   px(ctx, 1, 1, ROOM_W - 2, 30, wall);
   px(ctx, 1, 24, ROOM_W - 2, 7, wallShadow);
-  px(ctx, 1, FLOOR_Y, ROOM_W - 2, ROOM_H - FLOOR_Y - 1, floor);
+  px(ctx, 1, FLOOR_Y, ROOM_W - 2, ROOM_INNER_H - FLOOR_Y - 1, floor);
   // Stone tile grid
-  for (let y = FLOOR_Y; y < ROOM_H - 1; y += 4) {
+  for (let y = FLOOR_Y; y < ROOM_INNER_H - 1; y += 4) {
     px(ctx, 1, y, ROOM_W - 2, 1, floorDark);
   }
   for (let x = 1; x < ROOM_W - 1; x += 8) {
-    px(ctx, x, FLOOR_Y, 1, ROOM_H - FLOOR_Y - 1, floorDark);
+    px(ctx, x, FLOOR_Y, 1, ROOM_INNER_H - FLOOR_Y - 1, floorDark);
   }
 
   // === LATTICE WINDOW (centre-left) ===
@@ -59,7 +149,7 @@ function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: numb
   px(ctx, 24, 4, 26, 18, frame);
   // Paper fill or desktop
   if (theme.windowPanes === "desktop") {
-    ctx.clearRect(26 * SCALE, 6 * SCALE, 22 * SCALE, 14 * SCALE);
+    ctx.clearRect(26 * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
   } else {
     const paper = mix(theme.glass, "#fffaea", 0.55);
     const paperDark = shade(paper, 0.88);
@@ -164,7 +254,6 @@ function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: numb
 
   // === HANGING SCROLL (right wall) ===
   // Layout: top rod at y=1, paper y=3..14, bottom rod y=15
-  // Rods are thick (2px tall) and extend 2px wider than paper each side
   const sX = 59;   // left edge of paper
   const sW = 14;   // paper width
   const rodCol = DYN_SCROLL_ROD;
@@ -177,23 +266,23 @@ function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: numb
   dot(ctx, sX + 1, 1, rodCol);
   dot(ctx, sX + 12, 1, rodCol);
 
-  // Top rod: 2px tall, extends 2px each side of paper
+  // Top rod
   px(ctx, sX - 2, 2, sW + 4, 2, rodCol);
-  px(ctx, sX - 2, 2, sW + 4, 1, rodLite);         // highlight on top
-  dot(ctx, sX - 2, 3, rodDark);                    // left end cap shadow
-  dot(ctx, sX + sW + 1, 3, rodDark);               // right end cap shadow
+  px(ctx, sX - 2, 2, sW + 4, 1, rodLite);
+  dot(ctx, sX - 2, 3, rodDark);
+  dot(ctx, sX + sW + 1, 3, rodDark);
 
   // Paper / silk body
   const paperBg = mix(theme.glass, "#fffaea", 0.7);
-  const paperSide = shade(paperBg, 0.88);           // slight shadow at edges
+  const paperSide = shade(paperBg, 0.88);
   px(ctx, sX, 4, sW, 11, paperBg);
-  px(ctx, sX, 4, 1, 11, paperSide);                // left edge shadow
-  px(ctx, sX + sW - 1, 4, 1, 11, paperSide);       // right edge shadow
+  px(ctx, sX, 4, 1, 11, paperSide);
+  px(ctx, sX + sW - 1, 4, 1, 11, paperSide);
 
-  // 办 (bàn) — user-mapped 9×9 grid, origin (S, G)
+  // 办 (bàn) — user-mapped 9×9 grid
   const ink = DYN_INK;
-  const S = sX + 2;  // left edge of 9-wide glyph, centred on 14px paper
-  const G = 4;       // top edge
+  const S = sX + 2;
+  const G = 4;
   const bàn: [number, number][] = [
     [4,2],
     [2,3],[3,3],[4,3],[5,3],[6,3],[7,3],
@@ -205,11 +294,11 @@ function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: numb
   ];
   for (const [cx, cy] of bàn) dot(ctx, S + cx, G + cy, ink);
 
-  // Red seal — small rectangle bottom-right of paper
+  // Red seal
   px(ctx, sX + sW - 4, 13, 3, 2, DYN_LACQUER);
   px(ctx, sX + sW - 3, 13, 1, 1, mix(DYN_LACQUER, "#ffffff", 0.35));
 
-  // Bottom rod: 2px tall, same width as top
+  // Bottom rod
   px(ctx, sX - 2, 15, sW + 4, 2, rodCol);
   px(ctx, sX - 2, 15, sW + 4, 1, rodLite);
   dot(ctx, sX - 2, 16, rodDark);
@@ -232,18 +321,18 @@ function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: numb
   dot(ctx, 40, 41, DYN_GOLD_ALIAS(theme));
   dot(ctx, 41, 41, rugL);
 
-  // === BORDERS ===
+  // === BORDERS (full room box) ===
   px(ctx, 0, 0, ROOM_W, 1, OUTLINE);
-  px(ctx, 0, ROOM_H - 1, ROOM_W, 1, OUTLINE);
-  px(ctx, 0, 0, 1, ROOM_H, OUTLINE);
-  px(ctx, ROOM_W - 1, 0, 1, ROOM_H, OUTLINE);
+  px(ctx, 0, ROOM_INNER_H - 1, ROOM_W, 1, OUTLINE);
+  px(ctx, 0, 0, 1, ROOM_INNER_H, OUTLINE);
+  px(ctx, ROOM_W - 1, 0, 1, ROOM_INNER_H, OUTLINE);
 
   // Glow through window
   if (glow > 0 && theme.windowPanes !== "desktop") {
     ctx.save();
     ctx.globalAlpha = glow * 0.12;
     ctx.fillStyle = "#fff8d0";
-    ctx.fillRect(26 * SCALE, 6 * SCALE, 22 * SCALE, 14 * SCALE);
+    ctx.fillRect(26 * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
     ctx.restore();
   }
 }
@@ -301,17 +390,17 @@ export function drawThemedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow
   const chairDark = shade(chair, 0.72);
   const chairLite = mix(chair, "#fff8e8", 0.22);
 
-  px(ctx, 0, 0, ROOM_W, ROOM_H, OUTLINE);
+  px(ctx, 0, 0, ROOM_W, ROOM_INNER_H, OUTLINE);
   px(ctx, 1, 1, INNER_W, 30, wall);
   px(ctx, 1, 24, INNER_W, 7, wallShadow);
-  px(ctx, 1, FLOOR_Y, INNER_W, ROOM_H - FLOOR_Y - 1, floor);
-  for (let y = FLOOR_Y + 1; y < ROOM_H - 1; y += 3) {
+  px(ctx, 1, FLOOR_Y, INNER_W, ROOM_INNER_H - FLOOR_Y - 1, floor);
+  for (let y = FLOOR_Y + 1; y < ROOM_INNER_H - 1; y += 3) {
     px(ctx, 1, y, INNER_W, 1, floorDark);
   }
 
   px(ctx, 24, 4, 26, 18, frame);
   if (theme.windowPanes === "desktop") {
-    ctx.clearRect(26 * SCALE, 6 * SCALE, 22 * SCALE, 14 * SCALE);
+    ctx.clearRect(26 * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
   } else {
     const glass = theme.glass;
     const glassLite = mix(theme.glass, "#ffffff", 0.38);
@@ -402,15 +491,15 @@ export function drawThemedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow
   px(ctx, 28, 40, 24, 2, theme.rug);
 
   px(ctx, 0, 0, ROOM_W, 1, OUTLINE);
-  px(ctx, 0, ROOM_H - 1, ROOM_W, 1, OUTLINE);
-  px(ctx, 0, 0, 1, ROOM_H, OUTLINE);
-  px(ctx, ROOM_W - 1, 0, 1, ROOM_H, OUTLINE);
+  px(ctx, 0, ROOM_INNER_H - 1, ROOM_W, 1, OUTLINE);
+  px(ctx, 0, 0, 1, ROOM_INNER_H, OUTLINE);
+  px(ctx, ROOM_W - 1, 0, 1, ROOM_INNER_H, OUTLINE);
 
   if (glow > 0 && theme.windowPanes !== "desktop") {
     ctx.save();
     ctx.globalAlpha = glow * 0.18;
     ctx.fillStyle = "#fff4c8";
-    ctx.fillRect(26 * SCALE, 6 * SCALE, 22 * SCALE, 14 * SCALE);
+    ctx.fillRect(26 * SCALE, (6 + ROOF_PAD) * SCALE, 22 * SCALE, 14 * SCALE);
     ctx.restore();
   }
 }

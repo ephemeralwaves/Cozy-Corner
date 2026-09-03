@@ -1,3 +1,5 @@
+import { ROOF_PAD } from "./render";
+
 export const SELF_FRAME_W = 18;
 export const SELF_FRAME_H = 20;
 export const SELF_PAD_X = 1;
@@ -19,13 +21,13 @@ const MIN_X = 16;
 const MAX_X = 48;
 const DESK_X = 54;
 // Writing/typing anchor: high enough that arms rest on the tabletop.
-const DESK_Y = 15;
+const DESK_Y = 15 + ROOF_PAD;
 const CHAIR_X = 29;
 // Raised by 1px so the seated sprite sits on the chair top.
-const CHAIR_Y = 19;
+const CHAIR_Y = 19 + ROOF_PAD;
 const PIANO_X = 5;
-const PIANO_Y = 15;
-const GROUND_Y = 28;
+const PIANO_Y = 15 + ROOF_PAD;
+const GROUND_Y = 28 + ROOF_PAD;
 
 export class PixelSelf {
   x = 24;

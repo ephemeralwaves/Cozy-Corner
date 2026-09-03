@@ -1,5 +1,8 @@
 export const ROOM_W = 80;
-export const ROOM_H = 48;
+export const ROOM_INNER_H = 48;
+/** Extra pixels above the room box for the Dynasty roof. */
+export const ROOF_PAD = 18;
+export const ROOM_H = ROOM_INNER_H + ROOF_PAD;
 export const SCALE = 4;
 
 export function windowSize(): { width: number; height: number } {

@@ -1,3 +1,5 @@
+import { ROOF_PAD } from "./render";
+
 export type CatState = "idle" | "sit" | "walk" | "sleep";
 
 const FRAME_W = 16;
@@ -9,7 +11,7 @@ const SLEEP_FRAMES = 2;
 
 const MIN_X = 46;
 const MAX_X = 58;
-const BACK_Y = 26;
+const BACK_Y = 26 + ROOF_PAD;
 
 export class PixelCat {
   x = 50;

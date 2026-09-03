@@ -10,7 +10,7 @@
   <body>
     <div class="widget">
       <div class="drag" data-tauri-drag-region></div>
-      <canvas id="room" width="320" height="192"></canvas>
+      <canvas id="room" width="320" height="248"></canvas>
       <button type="button" id="radio-hotspot" title="Play / pause piano" data-tauri-drag-region="false"></button>
       <button type="button" id="board-hotspot" title="To-do list" data-tauri-drag-region="false"></button>
       <button type="button" id="buddy-hotspot" title="Play piano" data-tauri-drag-region="false"></button>
@@ -32,7 +32,7 @@
       <div class="cust-tabs" id="cust-tabs">
         <button type="button" data-tab="room" class="on">Room</button>
         <button type="button" data-tab="self">You</button>
-        <button type="button" data-tab="cat">Cat</button>
+        <button type="button" data-tab="cat">Pet</button>
       </div>
       <div data-panel="room">
         <div class="customize-row">
@@ -108,6 +108,13 @@
       </div>
       <div data-panel="cat" hidden>
         <div class="customize-row">
+          <span class="row-label">Kind</span>
+          <div id="styles-pet" class="presets hair-styles robe-wear">
+            <button type="button" data-pet="cat">Cat</button>
+            <button type="button" data-pet="dog">Dog</button>
+          </div>
+        </div>
+        <div class="customize-row">
           <label>Fur <input id="color-fur" type="color" /></label>
         </div>
         <div id="presets-cat" class="presets">
@@ -115,6 +122,12 @@
           <button type="button" data-cat="gray">Gray</button>
           <button type="button" data-cat="black">Black</button>
           <button type="button" data-cat="cream">Cream</button>
+        </div>
+        <div id="presets-dog" class="presets" hidden>
+          <button type="button" data-dog="golden">Golden</button>
+          <button type="button" data-dog="brown">Brown</button>
+          <button type="button" data-dog="black">Black</button>
+          <button type="button" data-dog="white">White</button>
         </div>
       </div>
       <button type="button" id="customize-done">Done</button>

@@ -3,6 +3,7 @@ import { LogicalSize } from "@tauri-apps/api/dpi";
 import { invoke } from "@tauri-apps/api/core";
 import selfUrl from "./assets/self.png";
 import catUrl from "./assets/cat.png";
+import dogUrl from "./assets/dog.png";
 import { PixelCat } from "./cat";
 import { PixelSelf, SELF_FRAME_H, SELF_FRAME_W, SELF_PAD_X, SELF_PAD_Y } from "./self";
 import { loadImage, ROOM_H, ROOM_W, SCALE, setupCanvas, windowSize } from "./render";
@@ -10,9 +11,11 @@ import { drawDeskStool, drawThemedRoom } from "./room";
 import { recolorCat, recolorSelf } from "./recolor";
 import {
   CAT_PRESETS,
+  DOG_PRESETS,
   HAIR_STYLES,
   hairRow,
   loadTheme,
+  PET_KINDS,
   ROBE_PRESETS,
   ROOM_PRESETS,
   ROOM_STYLES,
@@ -24,7 +27,7 @@ import {
 import { drawRobe } from "./robe";
 import { loadTodos, saveTodos, type Todo } from "./todos";
 
-const CUSTOMIZE_H = 520;
+const CUSTOMIZE_H = 592;
 
 function hideMenu(menu: HTMLElement) {
   menu.hidden = true;
@@ -135,6 +138,16 @@ function bindCustomize(theme: Theme, onChange: () => void, buddy: import("./self
     buddy.setRoomStyle(theme.roomStyle);
   };
 
+  const syncPet = () => {
+    for (const button of document.querySelectorAll<HTMLButtonElement>("#styles-pet button")) {
+      button.classList.toggle("on", button.dataset.pet === theme.petKind);
+    }
+    const catPresets = document.querySelector<HTMLElement>("#presets-cat")!;
+    const dogPresets = document.querySelector<HTMLElement>("#presets-dog")!;
+    catPresets.hidden = theme.petKind !== "cat";
+    dogPresets.hidden = theme.petKind !== "dog";
+  };
+
   const apply = () => {
     saveTheme(theme);
     onChange();
@@ -143,11 +156,13 @@ function bindCustomize(theme: Theme, onChange: () => void, buddy: import("./self
     syncRobe();
     syncWindow();
     syncRoomStyle();
+    syncPet();
   };
   syncHair();
   syncRobe();
   syncWindow();
   syncRoomStyle();
+  syncPet();
 
   for (const id of ids) {
     inputs[id].addEventListener("input", () => {
@@ -226,6 +241,27 @@ function bindCustomize(theme: Theme, onChange: () => void, buddy: import("./self
     const preset = CAT_PRESETS.find((item) => item.id === button?.dataset.cat);
     if (!preset) return;
     theme.fur = preset.fur;
+    apply();
+  });
+
+  document.querySelector("#presets-dog")!.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest("button");
+    const preset = DOG_PRESETS.find((item) => item.id === button?.dataset.dog);
+    if (!preset) return;
+    theme.fur = preset.fur;
+    apply();
+  });
+
+  document.querySelector("#styles-pet")!.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest("button");
+    const kind = PET_KINDS.find((item) => item.id === button?.dataset.pet);
+    if (!kind) return;
+    theme.petKind = kind.id;
+    if (kind.id === "dog" && CAT_PRESETS.some((p) => p.fur === theme.fur)) {
+      theme.fur = DOG_PRESETS[0].fur;
+    } else if (kind.id === "cat" && DOG_PRESETS.some((p) => p.fur === theme.fur)) {
+      theme.fur = CAT_PRESETS[0].fur;
+    }
     apply();
   });
 
@@ -321,16 +357,24 @@ async function boot() {
   const playing = { value: false };
   const theme = loadTheme();
   let ctx = setupCanvas(canvas, window.devicePixelRatio);
-  const [selfSrc, catSrc] = await Promise.all([loadImage(selfUrl), loadImage(catUrl)]);
+  const [selfSrc, catSrc, dogSrc] = await Promise.all([
+    loadImage(selfUrl),
+    loadImage(catUrl),
+    loadImage(dogUrl),
+  ]);
   let selfSheet: CanvasImageSource = recolorSelf(selfSrc, theme);
-  let catSheet: CanvasImageSource = recolorCat(catSrc, theme);
+  const petSheetFor = () =>
+    recolorCat(theme.petKind === "dog" ? dogSrc : catSrc, theme);
+  let petSheet: CanvasImageSource = petSheetFor();
   const buddy = new PixelSelf();
   buddy.setRoomStyle(theme.roomStyle);
-  const cat = new PixelCat();
+  const pet = new PixelCat();
+  catHotspot.title = theme.petKind === "dog" ? "Customize dog" : "Customize cat";
 
   bindCustomize(theme, () => {
     selfSheet = recolorSelf(selfSrc, theme);
-    catSheet = recolorCat(catSrc, theme);
+    petSheet = petSheetFor();
+    catHotspot.title = theme.petKind === "dog" ? "Customize dog" : "Customize cat";
   }, buddy);
   bindTodos();
 
@@ -388,20 +432,20 @@ async function boot() {
     const dt = Math.min(48, now - last);
     last = now;
     buddy.update(dt);
-    cat.update(dt);
+    pet.update(dt);
     const glow = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(now / 1400));
     ctx.clearRect(0, 0, ROOM_W * SCALE, ROOM_H * SCALE);
     drawThemedRoom(ctx, theme, glow);
-    cat.draw(ctx, catSheet, SCALE);
     drawDeskStool(ctx, theme);
+    pet.draw(ctx, petSheet, SCALE);
     buddy.draw(ctx, selfSheet, SCALE, hairRow(theme.hairStyle));
     drawRobe(ctx, buddy, SCALE, theme);
     buddyHotspot.style.left = `${(Math.round(buddy.x) - SELF_PAD_X) * SCALE}px`;
     buddyHotspot.style.top = `${(Math.round(buddy.y) - SELF_PAD_Y) * SCALE}px`;
     buddyHotspot.style.width = `${SELF_FRAME_W * SCALE}px`;
     buddyHotspot.style.height = `${SELF_FRAME_H * SCALE}px`;
-    catHotspot.style.left = `${Math.round(cat.x) * SCALE}px`;
-    catHotspot.style.top = `${Math.round(cat.y) * SCALE}px`;
+    catHotspot.style.left = `${Math.round(pet.x) * SCALE}px`;
+    catHotspot.style.top = `${Math.round(pet.y) * SCALE}px`;
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
