@@ -10,6 +10,13 @@ export const HAIR_STYLES = [
 
 export type HairStyle = (typeof HAIR_STYLES)[number]["id"];
 
+export const ROOM_STYLES = [
+  { id: "modern", label: "Modern" },
+  { id: "dynasty", label: "Dynasty" },
+] as const;
+
+export type RoomStyle = (typeof ROOM_STYLES)[number]["id"];
+
 export const WINDOW_PANES = [
   { id: "sky", label: "Sky" },
   { id: "desktop", label: "Desktop" },
@@ -25,6 +32,7 @@ export type Theme = {
   board: string;
   glass: string;
   windowPanes: WindowPanes;
+  roomStyle: RoomStyle;
   hair: string;
   hairStyle: HairStyle;
   skin: string;
@@ -44,6 +52,7 @@ export const DEFAULT_THEME: Theme = {
   board: "#be9766",
   glass: "#8ec8e8",
   windowPanes: "sky",
+  roomStyle: "modern",
   hair: "#4a3728",
   hairStyle: "short",
   skin: "#f0c8a0",
@@ -68,12 +77,17 @@ function isWindowPanes(value: unknown): value is WindowPanes {
   return WINDOW_PANES.some((item) => item.id === value);
 }
 
+function isRoomStyle(value: unknown): value is RoomStyle {
+  return ROOM_STYLES.some((item) => item.id === value);
+}
+
 export const ROOM_PRESETS = [
   { id: "cream", label: "Cream", theme: { wall: "#e8d5b7", floor: "#c4a574", furniture: "#8b5a3c" } },
   { id: "sage", label: "Sage", theme: { wall: "#d7e4cc", floor: "#b39a72", furniture: "#6d7f58" } },
   { id: "blush", label: "Blush", theme: { wall: "#f3d4ce", floor: "#c9a089", furniture: "#a45c5c" } },
   { id: "night", label: "Night", theme: { wall: "#3f4556", floor: "#2c2432", furniture: "#6a5348" } },
   { id: "sky", label: "Sky", theme: { wall: "#d3e7f4", floor: "#e0cba0", furniture: "#6f92b3" } },
+  { id: "dynasty", label: "Tang", theme: { wall: "#f0e0c0", floor: "#c09060", furniture: "#7a3820", rug: "#c83040", glass: "#e8d8a8", roomStyle: "dynasty" as const } },
 ] as const;
 
 export const SELF_PRESETS = [
@@ -137,11 +151,13 @@ export function loadTheme(): Theme {
     const windowPanes = isWindowPanes(parsed.windowPanes)
       ? parsed.windowPanes
       : DEFAULT_THEME.windowPanes;
+    const roomStyle = isRoomStyle(parsed.roomStyle) ? parsed.roomStyle : DEFAULT_THEME.roomStyle;
     return {
       ...DEFAULT_THEME,
       ...parsed,
       hairStyle,
       windowPanes,
+      roomStyle,
       robeOn: parsed.robeOn === true,
     };
   } catch {

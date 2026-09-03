@@ -65,7 +65,7 @@ export function drawRobe(
     return;
   }
 
-  if (pose === "type" || pose === "read") {
+  if (pose === "type" || pose === "read" || pose === "brush") {
     p(5, 9, 7, 3, robe);
     p(4, 10, 2, 3, robe);
     p(11, 10, 3, 3, robe);
@@ -77,25 +77,72 @@ export function drawRobe(
     p(4, 17, 9, 1, trim);
     p(4, 12, 2, 1, trim);
     p(12, 12, 1, 1, trim);
+    p(5, 9, 1, 2, stripe);
+    p(11, 9, 1, 2, stripe);
+    p(6, 11, 1, 1, lite);
     if (pose === "type") {
       p(7, 15, 1, 2, sash);
       p(10, 15, 1, 2, sash);
     }
-    p(5, 9, 1, 2, stripe);
-    p(11, 9, 1, 2, stripe);
-    p(6, 11, 1, 1, lite);
+    if (pose === "brush") {
+      p(7, 15, 1, 2, sash);
+      p(10, 15, 1, 2, sash);
+      const paper = "#f3ead2";
+      const paperLite = "#fffaf0";
+      const rod = "#5a3a20";
+      const ink = "#1a161c";
+      const shaft = "#b88440";
+      const ferrule = "#d4b050";
+      const bristle = "#241810";
+      p(4, 11, 7, 1, rod);
+      p(5, 12, 5, 5, paper);
+      p(6, 12, 3, 4, paperLite);
+      p(4, 17, 7, 1, rod);
+      p(6, 13, 1, 1, ink);
+      if (buddy.frame >= 1) p(7, 14, 1, 1, ink);
+      if (buddy.frame >= 2) {
+        p(7, 15, 1, 1, ink);
+        p(8, 14, 1, 1, ink);
+      }
+      p(3, 12, 2, 3, theme.skin);
+      const lift = buddy.frame === 0 ? 0 : buddy.frame === 2 ? 2 : 1;
+      const hx = 13;
+      const hy = 10 + lift;
+      p(11, 10, 2, 3, theme.skin);
+      p(hx, hy, 2, 1, theme.skin);
+      p(hx + 1, hy - 1, 1, 1, shaft);
+      p(hx, hy, 1, 1, ferrule);
+      p(hx - 1, hy + 1, 1, 1, bristle);
+      p(hx - 2, hy + 2, 1, 1, bristle);
+      if (buddy.frame === 2) p(hx - 2, hy + 3, 1, 1, ink);
+      ctx.restore();
+      return;
+    }
     if (pose === "read") {
       const book = "#f5ecd6";
       const spine = "#7a3e3a";
       const leaf = "#fffaf0";
       p(6, 12, 6, 4, book);
       p(9, 12, 1, 4, spine);
-      if (buddy.frame % 2 === 1) {
-        p(10, 12, 3, 3, leaf);
-        p(11, 13, 1, 1, spine);
-      }
+      p(6, 12, 3, 4, book);
       p(5, 12, 1, 1, theme.skin);
-      p(12, 12, 1, 1, theme.skin);
+      const turn = buddy.frame % 4;
+      if (turn === 0) {
+        p(10, 12, 2, 4, leaf);
+        p(12, 12, 1, 1, theme.skin);
+      } else if (turn === 1) {
+        p(10, 12, 1, 4, leaf);
+        p(11, 12, 1, 4, book);
+        p(11, 12, 2, 2, theme.skin);
+      } else if (turn === 2) {
+        p(10, 12, 2, 4, book);
+        p(8, 12, 1, 4, leaf);
+        p(10, 12, 2, 2, theme.skin);
+      } else {
+        p(10, 12, 2, 4, leaf);
+        p(11, 12, 1, 1, theme.skin);
+        p(12, 12, 1, 1, theme.skin);
+      }
     }
     ctx.restore();
     return;

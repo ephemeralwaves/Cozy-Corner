@@ -6,7 +6,7 @@ import catUrl from "./assets/cat.png";
 import { PixelCat } from "./cat";
 import { PixelSelf, SELF_FRAME_H, SELF_FRAME_W, SELF_PAD_X, SELF_PAD_Y } from "./self";
 import { loadImage, ROOM_H, ROOM_W, SCALE, setupCanvas, windowSize } from "./render";
-import { drawThemedRoom } from "./room";
+import { drawDeskStool, drawThemedRoom } from "./room";
 import { recolorCat, recolorSelf } from "./recolor";
 import {
   CAT_PRESETS,
@@ -15,6 +15,7 @@ import {
   loadTheme,
   ROBE_PRESETS,
   ROOM_PRESETS,
+  ROOM_STYLES,
   saveTheme,
   SELF_PRESETS,
   WINDOW_PANES,
@@ -83,7 +84,7 @@ async function handleAction(
   }
 }
 
-function bindCustomize(theme: Theme, onChange: () => void) {
+function bindCustomize(theme: Theme, onChange: () => void, buddy: import("./self").PixelSelf) {
   const ids = [
     "wall",
     "floor",
@@ -127,6 +128,13 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     }
   };
 
+  const syncRoomStyle = () => {
+    for (const button of document.querySelectorAll<HTMLButtonElement>("#styles-room button")) {
+      button.classList.toggle("on", button.dataset.roomStyle === theme.roomStyle);
+    }
+    buddy.setRoomStyle(theme.roomStyle);
+  };
+
   const apply = () => {
     saveTheme(theme);
     onChange();
@@ -134,10 +142,12 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     syncHair();
     syncRobe();
     syncWindow();
+    syncRoomStyle();
   };
   syncHair();
   syncRobe();
   syncWindow();
+  syncRoomStyle();
 
   for (const id of ids) {
     inputs[id].addEventListener("input", () => {
@@ -156,6 +166,14 @@ function bindCustomize(theme: Theme, onChange: () => void) {
     const preset = ROOM_PRESETS.find((item) => item.id === button?.dataset.preset);
     if (!preset) return;
     Object.assign(theme, preset.theme);
+    apply();
+  });
+
+  document.querySelector("#styles-room")!.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest("button");
+    const style = ROOM_STYLES.find((item) => item.id === button?.dataset.roomStyle);
+    if (!style) return;
+    theme.roomStyle = style.id;
     apply();
   });
 
@@ -307,12 +325,13 @@ async function boot() {
   let selfSheet: CanvasImageSource = recolorSelf(selfSrc, theme);
   let catSheet: CanvasImageSource = recolorCat(catSrc, theme);
   const buddy = new PixelSelf();
+  buddy.setRoomStyle(theme.roomStyle);
   const cat = new PixelCat();
 
   bindCustomize(theme, () => {
     selfSheet = recolorSelf(selfSrc, theme);
     catSheet = recolorCat(catSrc, theme);
-  });
+  }, buddy);
   bindTodos();
 
   window.addEventListener("resize", () => {
@@ -374,6 +393,7 @@ async function boot() {
     ctx.clearRect(0, 0, ROOM_W * SCALE, ROOM_H * SCALE);
     drawThemedRoom(ctx, theme, glow);
     cat.draw(ctx, catSheet, SCALE);
+    drawDeskStool(ctx, theme);
     buddy.draw(ctx, selfSheet, SCALE, hairRow(theme.hairStyle));
     drawRobe(ctx, buddy, SCALE, theme);
     buddyHotspot.style.left = `${(Math.round(buddy.x) - SELF_PAD_X) * SCALE}px`;

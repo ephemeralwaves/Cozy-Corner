@@ -399,6 +399,11 @@ body.customize {
   background: #d3e7f4;
 }
 
+.presets button[data-preset="dynasty"] {
+  background: #c83040;
+  color: #f5e8d0;
+}
+
 .presets button[data-self="default"] {
   background: #7eb8a0;
 }

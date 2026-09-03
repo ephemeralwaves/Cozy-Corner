@@ -311,7 +311,7 @@ function drawHair(p, { type = false, gy = 0, style = "short", ox = 0, oy = 0, ba
   }
 }
 
-function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = false, typeHand = 0, read = false, page = 0, piano = false, pianoHand = 0, hair = "short" } = {}) {
+function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = false, typeHand = 0, read = false, pageTurn = 0, piano = false, pianoHand = 0, brush = false, brushPhase = 0, hair = "short" } = {}) {
   const body = pixels(16, 16);
 
   if (read) {
@@ -331,16 +331,45 @@ function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = fal
       set(body, 10, 5, C.blush);
     }
     set(body, 8, 6, C.outline);
-    rect(body, 3, 7, 2, 3, C.skin);
-    rect(body, 11, 7, 2, 3, C.skin);
+    // Open book — all page motion stays inside this rectangle (x 5–10, y 8–11)
     rect(body, 5, 8, 6, 4, C.book);
     rect(body, 8, 8, 1, 4, C.bookDark);
-    if (page) {
-      rect(body, 9, 8, 3, 3, C.bookLite);
-      set(body, 10, 9, C.bookDark);
-    }
+    rect(body, 5, 8, 3, 4, C.book);
+    set(body, 6, 9, C.bookDark);
+    set(body, 6, 11, C.bookDark);
+
+    rect(body, 3, 7, 2, 3, C.skin);
     set(body, 4, 8, C.skin);
-    set(body, 11, 8, C.skin);
+
+    if (pageTurn === 0) {
+      rect(body, 9, 8, 2, 4, C.bookLite);
+      set(body, 10, 9, C.bookDark);
+      set(body, 10, 11, C.bookDark);
+      rect(body, 11, 7, 2, 3, C.skin);
+      set(body, 11, 8, C.skin);
+    } else if (pageTurn === 1) {
+      // Right page folding in: only one column of paper left, hand on that edge
+      rect(body, 9, 8, 1, 4, C.bookLite);
+      rect(body, 10, 8, 1, 4, C.book);
+      set(body, 9, 9, C.bookDark);
+      rect(body, 10, 8, 2, 2, C.skin);
+      set(body, 11, 9, C.skin);
+    } else if (pageTurn === 2) {
+      // Page on-edge at the gutter; right leaf is the under-page
+      rect(body, 9, 8, 2, 4, C.book);
+      rect(body, 7, 8, 1, 4, C.bookLite);
+      set(body, 8, 8, C.bookLite);
+      set(body, 8, 11, C.bookLite);
+      rect(body, 9, 8, 2, 2, C.skin);
+      set(body, 8, 9, C.skin);
+    } else {
+      // Settled open again, hand returning to the right cover
+      rect(body, 9, 8, 2, 4, C.bookLite);
+      set(body, 7, 9, C.bookDark);
+      rect(body, 11, 7, 2, 3, C.skin);
+      set(body, 10, 8, C.skin);
+    }
+
     const p = pixels(CHAR_W, CHAR_H);
     blit(p, body, CHAR_PAD_X, CHAR_PAD_Y);
     drawHair(p, { type: true, style: hair, ox: CHAR_PAD_X, oy: CHAR_PAD_Y });
@@ -371,6 +400,76 @@ function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = fal
     set(body, 5, leftY, C.skin);
     rect(body, 10, 6, 2, 3, C.skin);
     rect(body, 11, rightY, 4, 2, C.skin);
+    const p = pixels(CHAR_W, CHAR_H);
+    blit(p, body, CHAR_PAD_X, CHAR_PAD_Y);
+    drawHair(p, { type: true, style: hair, ox: CHAR_PAD_X, oy: CHAR_PAD_Y });
+    return p;
+  }
+
+  if (brush) {
+    // Seated calligraphy: left hand holds an unrolled scroll, right hand brushes it
+    rect(body, 4, 10, 7, 4, C.pants);
+    rect(body, 9, 11, 4, 3, C.pants);
+    set(body, 12, 13, C.shoes);
+    rect(body, 4, 5, 7, 6, C.shirt);
+    rect(body, 5, 1, 6, 5, C.skin);
+    rect(body, 4, 2, 8, 4, C.skin);
+    if (blink) {
+      rect(body, 6, 4, 2, 1, C.eye);
+      rect(body, 9, 4, 2, 1, C.eye);
+    } else {
+      set(body, 6, 4, C.eye);
+      set(body, 10, 4, C.eye);
+      set(body, 6, 5, C.blush);
+      set(body, 10, 5, C.blush);
+    }
+    set(body, 8, 6, C.outline);
+
+    const paper = [243, 234, 210];
+    const paperLite = [255, 250, 236];
+    const rod = [90, 58, 32];
+    const ink = [26, 22, 28];
+    const shaft = [210, 186, 120];
+    const ferrule = [168, 120, 48];
+    const bristle = [36, 24, 16];
+
+    // Vertical scroll: rods + paper, held at the torso
+    rect(body, 3, 7, 7, 1, rod);
+    rect(body, 4, 8, 5, 5, paper);
+    rect(body, 5, 8, 3, 4, paperLite);
+    rect(body, 3, 13, 7, 1, rod);
+    set(body, 3, 7, [140, 88, 40, 255]);
+    set(body, 9, 7, [140, 88, 40, 255]);
+    set(body, 3, 13, [140, 88, 40, 255]);
+    set(body, 9, 13, [140, 88, 40, 255]);
+
+    set(body, 5, 9, ink);
+    if (brushPhase >= 1) set(body, 6, 10, ink);
+    if (brushPhase >= 2) {
+      set(body, 6, 11, ink);
+      set(body, 7, 10, ink);
+    }
+
+    // Left hand wraps the left rod / paper edge
+    rect(body, 2, 8, 2, 3, C.skin);
+    set(body, 3, 10, C.skin);
+
+    // Right forearm from the side; hand grips a long diagonal brush
+    // 0 raised, 1 hover, 2 writing on paper, 3 lift
+    const lift = brushPhase === 0 ? 0 : brushPhase === 2 ? 2 : 1;
+    rect(body, 10, 6, 2, 3, C.skin);
+    set(body, 11, 8, C.skin);
+    const hx = 12;
+    const hy = 6 + lift;
+    set(body, hx, hy, C.skin);
+    set(body, hx + 1, hy, C.skin);
+    // Brush shaft from the fist down-left onto the scroll
+    set(body, hx + 1, hy - 1, shaft);
+    set(body, hx, hy, ferrule);
+    set(body, hx - 1, hy + 1, bristle);
+    set(body, hx - 2, hy + 2, bristle);
+    if (brushPhase === 2) set(body, hx - 2, hy + 3, ink);
+
     const p = pixels(CHAR_W, CHAR_H);
     blit(p, body, CHAR_PAD_X, CHAR_PAD_Y);
     drawHair(p, { type: true, style: hair, ox: CHAR_PAD_X, oy: CHAR_PAD_Y });
@@ -451,14 +550,18 @@ function drawSheet() {
     { type: true, typeHand: 1 },
     { type: true, typeHand: 0, blink: true },
     { type: true, typeHand: 2 },
-    { read: true, page: 0 },
-    { read: true, page: 1 },
-    { read: true, page: 0, blink: true },
-    { read: true, page: 1 },
+    { read: true, pageTurn: 0 },
+    { read: true, pageTurn: 1 },
+    { read: true, pageTurn: 2 },
+    { read: true, pageTurn: 3 },
     { piano: true, pianoHand: 0 },
     { piano: true, pianoHand: 1 },
     { piano: true, pianoHand: 0, blink: true },
     { piano: true, pianoHand: 2 },
+    { brush: true, brushPhase: 0 },
+    { brush: true, brushPhase: 1 },
+    { brush: true, brushPhase: 2 },
+    { brush: true, brushPhase: 3, blink: true },
   ];
   const sheet = pixels(CHAR_W * poses.length, CHAR_H * HAIR_STYLES.length);
   HAIR_STYLES.forEach((hair, row) => {
