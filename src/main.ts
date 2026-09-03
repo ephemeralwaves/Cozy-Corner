@@ -11,7 +11,6 @@ import { drawDeskStool, drawThemedRoom } from "./room";
 import { recolorCat, recolorSelf } from "./recolor";
 import {
   CAT_PRESETS,
-  DOG_PRESETS,
   HAIR_STYLES,
   hairRow,
   loadTheme,
@@ -25,7 +24,6 @@ import {
   type Theme,
 } from "./theme";
 import { drawRobe } from "./robe";
-import { loadTodos, saveTodos, type Todo } from "./todos";
 
 const CUSTOMIZE_H = 592;
 
@@ -58,7 +56,6 @@ async function handleAction(
 ) {
   if (action === "hide") {
     await setCustomizeMode(false);
-    document.querySelector<HTMLElement>("#todos")!.hidden = true;
     await getCurrentWindow().hide();
     return;
   }
@@ -142,10 +139,6 @@ function bindCustomize(theme: Theme, onChange: () => void, buddy: import("./self
     for (const button of document.querySelectorAll<HTMLButtonElement>("#styles-pet button")) {
       button.classList.toggle("on", button.dataset.pet === theme.petKind);
     }
-    const catPresets = document.querySelector<HTMLElement>("#presets-cat")!;
-    const dogPresets = document.querySelector<HTMLElement>("#presets-dog")!;
-    catPresets.hidden = theme.petKind !== "cat";
-    dogPresets.hidden = theme.petKind !== "dog";
   };
 
   const apply = () => {
@@ -244,24 +237,11 @@ function bindCustomize(theme: Theme, onChange: () => void, buddy: import("./self
     apply();
   });
 
-  document.querySelector("#presets-dog")!.addEventListener("click", (event) => {
-    const button = (event.target as HTMLElement).closest("button");
-    const preset = DOG_PRESETS.find((item) => item.id === button?.dataset.dog);
-    if (!preset) return;
-    theme.fur = preset.fur;
-    apply();
-  });
-
   document.querySelector("#styles-pet")!.addEventListener("click", (event) => {
     const button = (event.target as HTMLElement).closest("button");
     const kind = PET_KINDS.find((item) => item.id === button?.dataset.pet);
     if (!kind) return;
     theme.petKind = kind.id;
-    if (kind.id === "dog" && CAT_PRESETS.some((p) => p.fur === theme.fur)) {
-      theme.fur = DOG_PRESETS[0].fur;
-    } else if (kind.id === "cat" && DOG_PRESETS.some((p) => p.fur === theme.fur)) {
-      theme.fur = CAT_PRESETS[0].fur;
-    }
     apply();
   });
 
@@ -271,80 +251,11 @@ function bindCustomize(theme: Theme, onChange: () => void, buddy: import("./self
 }
 
 function bindTodos() {
-  const panel = document.querySelector<HTMLElement>("#todos")!;
-  const list = document.querySelector<HTMLUListElement>("#todo-list")!;
-  const form = document.querySelector<HTMLFormElement>("#todo-form")!;
-  const input = document.querySelector<HTMLInputElement>("#todo-input")!;
-  const close = document.querySelector<HTMLButtonElement>("#todo-close")!;
   const hotspot = document.querySelector<HTMLButtonElement>("#board-hotspot")!;
-  let todos = loadTodos();
-
-  const render = () => {
-    list.replaceChildren();
-    if (todos.length === 0) {
-      const empty = document.createElement("li");
-      empty.className = "todo-empty";
-      empty.textContent = "Pin a note…";
-      list.append(empty);
-      return;
-    }
-    for (const todo of todos) {
-      const item = document.createElement("li");
-      if (todo.done) item.classList.add("done");
-      const check = document.createElement("button");
-      check.type = "button";
-      check.className = "check";
-      check.title = todo.done ? "Not done" : "Done";
-      check.setAttribute("aria-label", check.title);
-      const text = document.createElement("span");
-      text.textContent = todo.text;
-      const drop = document.createElement("button");
-      drop.type = "button";
-      drop.className = "drop";
-      drop.title = "Remove";
-      drop.setAttribute("aria-label", "Remove");
-      drop.textContent = "×";
-      check.addEventListener("click", () => {
-        todo.done = !todo.done;
-        saveTodos(todos);
-        render();
-      });
-      drop.addEventListener("click", () => {
-        todos = todos.filter((entry) => entry.id !== todo.id);
-        saveTodos(todos);
-        render();
-      });
-      item.append(check, text, drop);
-      list.append(item);
-    }
-  };
-
-  const setOpen = (on: boolean) => {
-    panel.hidden = !on;
-    if (on) input.focus();
-  };
-
   hotspot.addEventListener("click", (event) => {
     event.stopPropagation();
-    setOpen(panel.hidden);
+    void invoke("todo_toggle_window");
   });
-
-  close.addEventListener("click", () => setOpen(false));
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const text = input.value.trim();
-    if (!text) return;
-    const todo: Todo = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, text, done: false };
-    todos = [todo, ...todos];
-    saveTodos(todos);
-    input.value = "";
-    render();
-    list.scrollTop = 0;
-  });
-
-  render();
-  return { close: () => setOpen(false) };
 }
 
 async function boot() {

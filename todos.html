@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/todos-window.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-do</title>
+    <script type="module" src="/src/todos-window.ts" defer></script>
+  </head>
+  <body>
+    <section id="todos" class="todo-panel">
+      <header class="todo-head" data-tauri-drag-region>
+        <h1 data-tauri-drag-region>To-do</h1>
+        <button type="button" id="todo-close" title="Close" aria-label="Close">×</button>
+      </header>
+      <ul id="todo-list" class="todo-list"></ul>
+      <form id="todo-form" class="todo-form">
+        <input id="todo-input" type="text" maxlength="80" placeholder="Add a note…" autocomplete="off" />
+        <button type="submit">Add</button>
+      </form>
+    </section>
+  </body>
+</html>

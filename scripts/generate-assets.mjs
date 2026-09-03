@@ -311,7 +311,7 @@ function drawHair(p, { type = false, gy = 0, style = "short", ox = 0, oy = 0, ba
   }
 }
 
-function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = false, typeHand = 0, read = false, pageTurn = 0, piano = false, pianoHand = 0, brush = false, brushPhase = 0, hair = "short" } = {}) {
+function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = false, typeHand = 0, read = false, pageTurn = 0, piano = false, pianoHand = 0, brush = false, brushPhase = 0, brew = false, brewPhase = 0, hair = "short" } = {}) {
   const body = pixels(16, 16);
 
   if (read) {
@@ -476,6 +476,86 @@ function drawChar({ bounce = 0, sit = false, walk = 0, blink = false, type = fal
     return p;
   }
 
+  if (brew) {
+    // Seated potion-making: cauldron in front, right hand stirs, bottles nearby
+    rect(body, 4, 10, 7, 4, C.pants);
+    rect(body, 9, 11, 4, 3, C.pants);
+    set(body, 12, 13, C.shoes);
+    rect(body, 4, 5, 7, 6, C.shirt);
+    rect(body, 5, 1, 6, 5, C.skin);
+    rect(body, 4, 2, 8, 4, C.skin);
+    if (blink) {
+      rect(body, 6, 4, 2, 1, C.eye);
+      rect(body, 9, 4, 2, 1, C.eye);
+    } else {
+      set(body, 6, 4, C.eye);
+      set(body, 10, 4, C.eye);
+      set(body, 6, 5, C.blush);
+      set(body, 10, 5, C.blush);
+    }
+    set(body, 8, 6, C.outline);
+
+    const pot = [72, 68, 88];
+    const potLite = [110, 104, 130];
+    const potDark = [40, 38, 52];
+    const brewColors = [
+      [80, 200, 140],
+      [120, 90, 220],
+      [240, 120, 80],
+      [90, 180, 230],
+    ];
+    const liquid = brewColors[brewPhase % brewColors.length];
+    const liquidLite = liquid.map((c) => Math.min(255, c + 40));
+    const spoon = [180, 140, 70];
+    const spoonDark = [120, 88, 40];
+
+    // Cauldron / brewing pot on the desk
+    rect(body, 5, 10, 6, 4, pot);
+    rect(body, 4, 11, 8, 3, pot);
+    rect(body, 5, 10, 6, 1, potLite);
+    rect(body, 4, 13, 8, 1, potDark);
+    // Liquid surface
+    rect(body, 5, 11, 6, 2, liquid);
+    set(body, 6, 11, liquidLite);
+    set(body, 8, 11, liquidLite);
+    // Bubbles rise with phase
+    if (brewPhase >= 1) set(body, 7, 10, liquidLite);
+    if (brewPhase >= 2) {
+      set(body, 6, 9, liquidLite);
+      set(body, 9, 9, [255, 240, 180, 255]);
+    }
+    if (brewPhase >= 3) {
+      set(body, 8, 8, [255, 250, 200, 255]);
+      set(body, 5, 9, liquid);
+    }
+
+    // Left hand steadies the pot rim
+    rect(body, 3, 9, 2, 3, C.skin);
+    set(body, 4, 10, C.skin);
+
+    // Right arm stirs — spoon dips into the brew
+    // 0 raised, 1 hover, 2 deep stir, 3 lift with drip
+    const lift = brewPhase === 0 ? 0 : brewPhase === 2 ? 2 : 1;
+    rect(body, 10, 6, 2, 3, C.skin);
+    set(body, 11, 8, C.skin);
+    const hx = 11;
+    const hy = 7 + lift;
+    set(body, hx, hy, C.skin);
+    set(body, hx + 1, hy, C.skin);
+    // Spoon handle + bowl
+    set(body, hx + 1, hy - 1, spoon);
+    set(body, hx, hy, spoonDark);
+    set(body, hx - 1, hy + 1, spoon);
+    set(body, hx - 1, hy + 2, spoonDark);
+    if (brewPhase === 2) set(body, hx - 1, hy + 3, liquid);
+    if (brewPhase === 3) set(body, hx - 1, hy + 2, liquidLite);
+
+    const p = pixels(CHAR_W, CHAR_H);
+    blit(p, body, CHAR_PAD_X, CHAR_PAD_Y);
+    drawHair(p, { type: true, style: hair, ox: CHAR_PAD_X, oy: CHAR_PAD_Y });
+    return p;
+  }
+
   if (piano) {
     rect(body, 4, 11, 8, 4, C.pants);
     rect(body, 5, 14, 2, 2, C.shoes);
@@ -562,6 +642,10 @@ function drawSheet() {
     { brush: true, brushPhase: 1 },
     { brush: true, brushPhase: 2 },
     { brush: true, brushPhase: 3, blink: true },
+    { brew: true, brewPhase: 0 },
+    { brew: true, brewPhase: 1 },
+    { brew: true, brewPhase: 2 },
+    { brew: true, brewPhase: 3, blink: true },
   ];
   const sheet = pixels(CHAR_W * poses.length, CHAR_H * HAIR_STYLES.length);
   HAIR_STYLES.forEach((hair, row) => {

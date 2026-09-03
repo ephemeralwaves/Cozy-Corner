@@ -13,6 +13,7 @@ export type HairStyle = (typeof HAIR_STYLES)[number]["id"];
 export const ROOM_STYLES = [
   { id: "modern", label: "Modern" },
   { id: "dynasty", label: "Dynasty" },
+  { id: "enchanted", label: "Enchanted" },
 ] as const;
 
 export type RoomStyle = (typeof ROOM_STYLES)[number]["id"];
@@ -100,7 +101,19 @@ export const ROOM_PRESETS = [
   { id: "blush", label: "Blush", theme: { wall: "#f3d4ce", floor: "#c9a089", furniture: "#a45c5c" } },
   { id: "night", label: "Night", theme: { wall: "#3f4556", floor: "#2c2432", furniture: "#6a5348" } },
   { id: "sky", label: "Sky", theme: { wall: "#d3e7f4", floor: "#e0cba0", furniture: "#6f92b3" } },
-  { id: "dynasty", label: "Tang", theme: { wall: "#f0e0c0", floor: "#c09060", furniture: "#7a3820", rug: "#c83040", glass: "#e8d8a8", roomStyle: "dynasty" as const } },
+  { id: "dynasty", label: "Tang", theme: { wall: "#f0e0c0", floor: "#c09060", furniture: "#7a3820", rug: "#c83040", glass: "#e8d8a8" } },
+  {
+    id: "enchanted",
+    label: "Grove",
+    theme: {
+      wall: "#c8d8d0",
+      floor: "#a88868",
+      furniture: "#6a4834",
+      rug: "#5a8878",
+      board: "#c4a878",
+      glass: "#98b8d8",
+    },
+  },
 ] as const;
 
 export const SELF_PRESETS = [
@@ -122,13 +135,6 @@ export const CAT_PRESETS = [
   { id: "gray", label: "Gray", fur: "#9aa0a8" },
   { id: "black", label: "Black", fur: "#3a3230" },
   { id: "cream", label: "Cream", fur: "#e8d0a8" },
-] as const;
-
-export const DOG_PRESETS = [
-  { id: "golden", label: "Golden", fur: "#d4a05a" },
-  { id: "brown", label: "Brown", fur: "#8b5a3c" },
-  { id: "black", label: "Black", fur: "#2e2a28" },
-  { id: "white", label: "White", fur: "#e8e0d4" },
 ] as const;
 
 export const SRC = {

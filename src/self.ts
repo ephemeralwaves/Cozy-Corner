@@ -1,11 +1,12 @@
 import { ROOF_PAD } from "./render";
+import type { RoomStyle } from "./theme";
 
 export const SELF_FRAME_W = 18;
 export const SELF_FRAME_H = 20;
 export const SELF_PAD_X = 1;
 export const SELF_PAD_Y = 4;
 
-export type SelfState = "idle" | "sit" | "walk" | "type" | "read" | "piano" | "brush";
+export type SelfState = "idle" | "sit" | "walk" | "type" | "read" | "piano" | "brush" | "brew";
 
 const FRAME_W = SELF_FRAME_W;
 const FRAME_H = SELF_FRAME_H;
@@ -16,6 +17,7 @@ const TYPE_FRAMES = 4;
 const READ_FRAMES = 4;
 const PIANO_FRAMES = 4;
 const BRUSH_FRAMES = 4;
+const BREW_FRAMES = 4;
 
 const MIN_X = 16;
 const MAX_X = 48;
@@ -29,19 +31,28 @@ const PIANO_X = 5;
 const PIANO_Y = 15 + ROOF_PAD;
 const GROUND_Y = 28 + ROOF_PAD;
 
+const DESK_STATES: SelfState[] = ["type", "brush", "brew"];
+
+function deskStateFor(style: RoomStyle): Exclude<SelfState, "walk"> {
+  if (style === "dynasty") return "brush";
+  if (style === "enchanted") return "brew";
+  return "type";
+}
+
 export class PixelSelf {
   x = 24;
   y = GROUND_Y;
   facing: 1 | -1 = 1;
   state: SelfState = "idle";
-  roomStyle: "modern" | "dynasty" = "modern";
+  roomStyle: RoomStyle = "modern";
 
-  setRoomStyle(style: "modern" | "dynasty") {
+  setRoomStyle(style: RoomStyle) {
     this.roomStyle = style;
-    const dest = style === "dynasty" ? "brush" : "type";
-    const from = style === "dynasty" ? "type" : "brush";
-    if (this.state === from) this.enter(dest);
-    if (this.state === "walk" && this.afterWalk === from) this.afterWalk = dest;
+    const dest = deskStateFor(style);
+    if (DESK_STATES.includes(this.state) && this.state !== dest) this.enter(dest);
+    if (this.state === "walk" && DESK_STATES.includes(this.afterWalk) && this.afterWalk !== dest) {
+      this.afterWalk = dest;
+    }
   }
   frame = 0;
   private frameMs = 0;
@@ -54,8 +65,10 @@ export class PixelSelf {
   private holdMs = 3500;
 
   get typing(): boolean {
-    return this.state === "type" || this.state === "brush" ||
-      (this.state === "walk" && (this.afterWalk === "type" || this.afterWalk === "brush"));
+    return (
+      DESK_STATES.includes(this.state) ||
+      (this.state === "walk" && DESK_STATES.includes(this.afterWalk))
+    );
   }
 
   get reading(): boolean {
@@ -68,14 +81,20 @@ export class PixelSelf {
 
   nextClickLabel(): string {
     if (this.typing) return "Idle";
-    if (this.reading) return this.roomStyle === "dynasty" ? "Sit and write" : "Sit and type";
+    if (this.reading) {
+      if (this.roomStyle === "modern") return "Sit and type";
+      if (this.roomStyle === "enchanted") return "Sit and brew";
+      return "Sit and write";
+    }
     if (this.playingPiano) return "Read by the window";
-    return this.roomStyle === "dynasty" ? "Play guzheng" : "Play piano";
+    if (this.roomStyle === "dynasty") return "Play guzheng";
+    if (this.roomStyle === "enchanted") return "Play harp";
+    return "Play piano";
   }
 
   onClick() {
     const busy = this.state === "walk" ? this.afterWalk : this.state;
-    if (busy === "type" || busy === "brush") {
+    if (DESK_STATES.includes(busy)) {
       this.y = GROUND_Y;
       this.facing = -1;
       this.enter("idle");
@@ -101,15 +120,15 @@ export class PixelSelf {
         ? 160
         : this.state === "type"
           ? 110
-          : this.state === "brush"
-            ? 320
+          : this.state === "brush" || this.state === "brew"
+            ? 280
             : this.state === "read"
-            ? 520
-            : this.state === "piano"
-              ? 130
-              : this.state === "sit"
-                ? 480
-                : 280;
+              ? 520
+              : this.state === "piano"
+                ? 130
+                : this.state === "sit"
+                  ? 480
+                  : 280;
     if (this.frameMs >= frameDur) {
       this.frameMs -= frameDur;
       const count =
@@ -125,7 +144,9 @@ export class PixelSelf {
                   ? PIANO_FRAMES
                   : this.state === "brush"
                     ? BRUSH_FRAMES
-                    : TYPE_FRAMES;
+                    : this.state === "brew"
+                      ? BREW_FRAMES
+                      : TYPE_FRAMES;
       this.frame = (this.frame + 1) % count;
     }
 
@@ -139,7 +160,13 @@ export class PixelSelf {
       if ((dir > 0 && this.x >= this.walkTarget) || (dir < 0 && this.x <= this.walkTarget)) {
         this.x = this.walkTarget;
         this.y = this.walkToY;
-        if (this.afterWalk === "type" || this.afterWalk === "brush" || this.afterWalk === "read" || this.afterWalk === "piano") {
+        if (
+          this.afterWalk === "type" ||
+          this.afterWalk === "brush" ||
+          this.afterWalk === "brew" ||
+          this.afterWalk === "read" ||
+          this.afterWalk === "piano"
+        ) {
           this.facing = 1;
         }
         this.enter(this.afterWalk);
@@ -147,7 +174,7 @@ export class PixelSelf {
       return;
     }
 
-    if (this.state === "type" || this.state === "brush") {
+    if (DESK_STATES.includes(this.state)) {
       this.facing = 1;
       this.y = DESK_Y;
       return;
@@ -195,6 +222,18 @@ export class PixelSelf {
         (this.frame % BRUSH_FRAMES)
       );
     }
+    if (this.state === "brew") {
+      return (
+        IDLE_FRAMES +
+        SIT_FRAMES +
+        WALK_FRAMES +
+        TYPE_FRAMES +
+        READ_FRAMES +
+        PIANO_FRAMES +
+        BRUSH_FRAMES +
+        (this.frame % BREW_FRAMES)
+      );
+    }
     return (
       IDLE_FRAMES +
       SIT_FRAMES +
@@ -205,7 +244,8 @@ export class PixelSelf {
     );
   }
 
-  robePose(): { gy: number; pose: "stand" | "sit" | "type" | "read" | "piano" | "brush" } {
+  robePose(): { gy: number; pose: "stand" | "sit" | "type" | "read" | "piano" | "brush" | "brew" } {
+    if (this.state === "brew") return { gy: 0, pose: "brew" };
     if (this.state === "brush") return { gy: 0, pose: "brush" };
     if (this.state === "type") return { gy: 0, pose: "type" };
     if (this.state === "read") return { gy: 0, pose: "read" };
@@ -256,7 +296,7 @@ export class PixelSelf {
   }
 
   private goToDesk() {
-    const dest: SelfState = this.roomStyle === "dynasty" ? "brush" : "type";
+    const dest = deskStateFor(this.roomStyle);
     this.facing = 1;
     if (Math.abs(this.x - DESK_X) < 2) {
       this.x = DESK_X;
@@ -272,7 +312,13 @@ export class PixelSelf {
     this.walkFromY = this.y;
     this.walkTarget = target;
     this.walkToY =
-      then === "type" || then === "brush" ? DESK_Y : then === "read" ? CHAIR_Y : then === "piano" ? PIANO_Y : GROUND_Y;
+      then === "type" || then === "brush" || then === "brew"
+        ? DESK_Y
+        : then === "read"
+          ? CHAIR_Y
+          : then === "piano"
+            ? PIANO_Y
+            : GROUND_Y;
     this.afterWalk = then;
     this.enter("walk");
   }

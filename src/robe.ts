@@ -65,7 +65,7 @@ export function drawRobe(
     return;
   }
 
-  if (pose === "type" || pose === "read" || pose === "brush") {
+  if (pose === "type" || pose === "read" || pose === "brush" || pose === "brew") {
     p(5, 9, 7, 3, robe);
     p(4, 10, 2, 3, robe);
     p(11, 10, 3, 3, robe);
@@ -83,6 +83,43 @@ export function drawRobe(
     if (pose === "type") {
       p(7, 15, 1, 2, sash);
       p(10, 15, 1, 2, sash);
+    }
+    if (pose === "brew") {
+      p(7, 15, 1, 2, sash);
+      p(10, 15, 1, 2, sash);
+      const pot = "#484458";
+      const potLite = "#6e6882";
+      const potDark = "#282634";
+      const liquids = ["#50c88c", "#785acc", "#f07850", "#5ab4e6"];
+      const liquid = liquids[buddy.frame % liquids.length];
+      const spoon = "#b48c46";
+      const spoonDark = "#785828";
+      // Cauldron
+      p(6, 12, 6, 4, pot);
+      p(5, 13, 8, 3, pot);
+      p(6, 12, 6, 1, potLite);
+      p(5, 15, 8, 1, potDark);
+      p(6, 13, 6, 2, liquid);
+      if (buddy.frame >= 1) p(8, 12, 1, 1, mix(liquid, "#ffffff", 0.4));
+      if (buddy.frame >= 2) {
+        p(7, 11, 1, 1, mix(liquid, "#ffffff", 0.5));
+        p(10, 11, 1, 1, "#fff0b4");
+      }
+      if (buddy.frame >= 3) p(9, 10, 1, 1, "#fff8c8");
+      // Hands + spoon
+      p(4, 11, 2, 3, theme.skin);
+      const lift = buddy.frame === 0 ? 0 : buddy.frame === 2 ? 2 : 1;
+      const hx = 12;
+      const hy = 10 + lift;
+      p(11, 10, 2, 3, theme.skin);
+      p(hx, hy, 2, 1, theme.skin);
+      p(hx + 1, hy - 1, 1, 1, spoon);
+      p(hx, hy, 1, 1, spoonDark);
+      p(hx - 1, hy + 1, 1, 1, spoon);
+      p(hx - 1, hy + 2, 1, 1, spoonDark);
+      if (buddy.frame === 2) p(hx - 1, hy + 3, 1, 1, liquid);
+      ctx.restore();
+      return;
     }
     if (pose === "brush") {
       p(7, 15, 1, 2, sash);

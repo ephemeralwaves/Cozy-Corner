@@ -1,6 +1,6 @@
 export const ROOM_W = 80;
 export const ROOM_INNER_H = 48;
-/** Extra pixels above the room box for the Dynasty roof. */
+/** Extra pixels above the room box for peaked roofs. */
 export const ROOF_PAD = 18;
 export const ROOM_H = ROOM_INNER_H + ROOF_PAD;
 export const SCALE = 4;

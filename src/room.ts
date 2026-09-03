@@ -118,6 +118,118 @@ function drawChineseRoof(ctx: CanvasRenderingContext2D, _theme: Theme) {
   pxAbs(ctx, 0, baseY, ROOM_W, 1, ink);
 }
 
+function drawEnchantedRoof(ctx: CanvasRenderingContext2D, theme: Theme) {
+  const ink = OUTLINE;
+  const wood = mix(theme.furniture, "#8a6038", 0.25);
+  const woodDark = shade(wood, 0.7);
+  const woodMid = shade(wood, 0.85);
+  const woodLite = mix(wood, "#e8d0a0", 0.28);
+  const ivy = mix(theme.wall, "#4a7850", 0.55);
+  const ivyLite = mix(ivy, "#a0d070", 0.4);
+  const ivyDark = shade(ivy, 0.72);
+  const brick = "#a45c48";
+  const brickDark = "#7a3c34";
+  const brickLite = "#c87860";
+  const cx = Math.floor(ROOM_W / 2);
+  const peakY = 3;
+  const baseY = ROOF_PAD - 1;
+
+  // Wooden triangle — each row is a shingle band
+  for (let y = peakY; y <= baseY; y++) {
+    const t = (y - peakY) / Math.max(1, baseY - peakY);
+    const half = Math.floor(1 + t * (cx - 1));
+    const left = cx - half;
+    const right = cx + half;
+    const w = right - left + 1;
+    let fill = wood;
+    if (y >= baseY - 1) fill = woodDark;
+    else if ((y - peakY) % 3 === 2) fill = woodMid;
+    else if ((y - peakY) % 3 === 0) fill = woodLite;
+    pxAbs(ctx, left, y, w, 1, fill);
+    dotAbs(ctx, left, y, ink);
+    dotAbs(ctx, right, y, ink);
+  }
+
+  // Ridge beam
+  pxAbs(ctx, cx - 1, peakY, 3, 1, ink);
+  pxAbs(ctx, cx, peakY - 1, 1, 1, woodLite);
+
+  // Underside fascia on the room box
+  pxAbs(ctx, 0, baseY, ROOM_W, 1, ink);
+
+  // Little chimney on the right slope
+  const chX = 54;
+  const chTop = 1;
+  const chW = 5;
+  const chMeet = 8;
+  pxAbs(ctx, chX, chTop + 1, chW, chMeet - chTop, brick);
+  pxAbs(ctx, chX, chTop + 1, 1, chMeet - chTop, brickDark);
+  pxAbs(ctx, chX + chW - 1, chTop + 1, 1, chMeet - chTop, brickDark);
+  // Brick rows
+  for (let y = chTop + 2; y < chMeet; y += 2) {
+    pxAbs(ctx, chX + 1, y, chW - 2, 1, brickDark);
+  }
+  // Cap
+  pxAbs(ctx, chX - 1, chTop, chW + 2, 1, brickDark);
+  pxAbs(ctx, chX, chTop, chW, 1, brickLite);
+  pxAbs(ctx, chX + 1, chTop - 1, chW - 2, 1, brickDark);
+  // Tiny smoke
+  dotAbs(ctx, chX + 2, 0, mix(theme.glass, "#d0d8e0", 0.5));
+  dotAbs(ctx, chX + 4, 0, mix(theme.glass, "#d0d8e0", 0.35));
+
+  // Overgrown vines — climb the left slope, spill onto the peak and right
+  const leftStem: [number, number][] = [
+    [4, baseY - 1],
+    [6, baseY - 2],
+    [8, baseY - 3],
+    [10, baseY - 4],
+    [12, baseY - 5],
+    [15, baseY - 6],
+    [18, baseY - 7],
+    [22, baseY - 8],
+    [26, baseY - 9],
+    [30, baseY - 10],
+    [34, peakY + 4],
+    [37, peakY + 2],
+  ];
+  for (const [x, y] of leftStem) dotAbs(ctx, x, y, ivyDark);
+  for (const [x, y] of [
+    [5, baseY - 1],
+    [7, baseY - 3],
+    [9, baseY - 2],
+    [11, baseY - 5],
+    [13, baseY - 4],
+    [16, baseY - 7],
+    [19, baseY - 6],
+    [21, baseY - 8],
+    [24, baseY - 7],
+    [27, baseY - 9],
+    [31, baseY - 9],
+    [33, peakY + 3],
+    [36, peakY + 1],
+    [38, peakY + 2],
+    [39, peakY + 1],
+  ] as const) {
+    dotAbs(ctx, x, y, (x + y) % 2 === 0 ? ivy : ivyLite);
+  }
+  // Tendrils over the right eaves and chimney base
+  for (const [x, y] of [
+    [48, baseY - 4],
+    [50, baseY - 3],
+    [52, baseY - 2],
+    [53, chMeet],
+    [58, chMeet + 1],
+    [60, baseY - 5],
+    [63, baseY - 4],
+    [66, baseY - 3],
+    [70, baseY - 2],
+    [73, baseY - 1],
+  ] as const) {
+    dotAbs(ctx, x, y, ivy);
+    dotAbs(ctx, x + 1, y - 1, ivyLite);
+  }
+}
+
 function drawDynastyRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: number) {
   const wall = theme.wall;
   const wallShadow = shade(theme.wall, 0.85);
@@ -341,6 +453,458 @@ function DYN_GOLD_ALIAS(theme: Theme): string {
   return mix(theme.furniture, "#f0c840", 0.6);
 }
 
+function drawStandingHarp(ctx: CanvasRenderingContext2D) {
+  // Flaticon-style silhouette, sized to leave headroom for floating ♪ notes.
+  const ink = OUTLINE;
+  const gold = "#f0c430";
+  const goldLite = "#ffe878";
+  const goldMid = "#e0a820";
+  const goldDark = "#c88818";
+  const orange = "#e87820";
+  const orangeDark = "#c85810";
+  const orangeLite = "#f09840";
+
+  // Orange base
+  px(ctx, 3, 32, 14, 2, ink);
+  px(ctx, 4, 32, 12, 1, orangeLite);
+  px(ctx, 4, 33, 12, 1, orangeDark);
+
+  // Left pillar — flared crown, orange collars, flared foot
+  px(ctx, 3, 10, 4, 1, ink);
+  px(ctx, 4, 10, 2, 1, goldLite);
+  px(ctx, 3, 11, 4, 2, ink);
+  px(ctx, 4, 11, 2, 1, goldLite);
+  px(ctx, 4, 12, 2, 1, gold);
+  px(ctx, 3, 13, 4, 1, ink);
+  px(ctx, 4, 13, 2, 1, orangeLite);
+  px(ctx, 3, 14, 4, 12, ink);
+  px(ctx, 4, 14, 2, 12, gold);
+  px(ctx, 4, 14, 1, 12, goldLite);
+  px(ctx, 5, 14, 1, 12, goldDark);
+  px(ctx, 3, 19, 1, 2, goldMid);
+  px(ctx, 4, 24, 2, 1, orange);
+  px(ctx, 3, 25, 4, 7, ink);
+  px(ctx, 4, 25, 2, 7, gold);
+  px(ctx, 4, 25, 1, 7, goldLite);
+  px(ctx, 5, 25, 1, 7, goldDark);
+  px(ctx, 2, 29, 6, 3, ink);
+  px(ctx, 3, 29, 4, 1, goldMid);
+  px(ctx, 3, 30, 4, 1, gold);
+  px(ctx, 3, 31, 4, 1, goldDark);
+
+  // S-curve neck: out from pillar, dip, crest, down into soundboard
+  const neck: [number, number, number, string][] = [
+    [7, 11, 2, goldLite],
+    [7, 12, 2, gold],
+    [9, 12, 2, gold],
+    [9, 13, 2, goldMid],
+    [10, 11, 2, goldLite],
+    [10, 12, 3, gold],
+    [11, 10, 2, goldLite],
+    [12, 11, 2, gold],
+    [12, 12, 2, goldMid],
+    [13, 12, 2, gold],
+    [13, 13, 3, goldMid],
+    [14, 14, 2, gold],
+    [14, 15, 2, goldDark],
+  ];
+  for (const [x, y, w, fill] of neck) {
+    px(ctx, x - 1, y, w + 2, 1, ink);
+    px(ctx, x, y, w, 1, fill);
+  }
+  px(ctx, 10, 13, 2, 1, goldDark);
+
+  // Slanted soundboard — thick bar widening toward the base
+  const board: [number, number, number][] = [
+    [15, 13, 3],
+    [16, 13, 3],
+    [17, 12, 4],
+    [18, 12, 4],
+    [19, 12, 4],
+    [20, 11, 5],
+    [21, 11, 5],
+    [22, 11, 5],
+    [23, 10, 6],
+    [24, 10, 6],
+    [25, 10, 6],
+    [26, 10, 6],
+    [27, 9, 7],
+    [28, 9, 7],
+    [29, 9, 7],
+    [30, 9, 7],
+    [31, 9, 7],
+  ];
+  for (const [y, left, w] of board) {
+    px(ctx, left - 1, y, w + 2, 1, ink);
+    px(ctx, left, y, w, 1, gold);
+    dot(ctx, left, y, goldLite);
+    dot(ctx, left + w - 1, y, goldDark);
+  }
+  px(ctx, 14, 15, 2, 1, gold);
+  px(ctx, 13, 16, 1, 1, goldLite);
+}
+
+function drawEnchantedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: number) {
+  const wall = theme.wall;
+  const wallShadow = shade(theme.wall, 0.86);
+  const wallMoss = mix(theme.wall, "#6a9070", 0.35);
+  const floor = theme.floor;
+  const floorDark = shade(theme.floor, 0.78);
+  const wood = theme.furniture;
+  const woodDark = shade(wood, 0.68);
+  const woodLite = mix(wood, "#fff8e8", 0.28);
+  const frame = mix(wood, OUTLINE, 0.35);
+
+  drawEnchantedRoof(ctx, theme);
+
+  // Room shell
+  px(ctx, 0, 0, ROOM_W, ROOM_INNER_H, OUTLINE);
+  px(ctx, 1, 1, INNER_W, 30, wall);
+  px(ctx, 1, 24, INNER_W, 7, wallShadow);
+  px(ctx, 1, FLOOR_Y, INNER_W, ROOM_INNER_H - FLOOR_Y - 1, floor);
+  for (let y = FLOOR_Y + 1; y < ROOM_INNER_H - 1; y += 4) {
+    px(ctx, 1, y, INNER_W, 1, floorDark);
+  }
+  // Soft moss patches along the baseboard
+  for (const mx of [2, 10, 48, 70]) {
+    px(ctx, mx, 29, 3, 2, wallMoss);
+    dot(ctx, mx + 1, 28, mix(wallMoss, "#90c090", 0.4));
+  }
+
+  // Arched moonlit window
+  px(ctx, 26, 5, 22, 17, frame);
+  // Arch crown
+  px(ctx, 30, 3, 14, 2, frame);
+  px(ctx, 33, 2, 8, 1, frame);
+  if (theme.windowPanes === "desktop") {
+    ctx.clearRect(28 * SCALE, (6 + ROOF_PAD) * SCALE, 18 * SCALE, 14 * SCALE);
+  } else {
+    const glass = theme.glass;
+    const glassLite = mix(theme.glass, "#ffffff", 0.35);
+    const glassDeep = mix(theme.glass, "#304868", 0.25);
+    px(ctx, 28, 6, 18, 14, glass);
+    px(ctx, 28, 6, 18, 5, glassLite);
+    px(ctx, 28, 16, 18, 4, glassDeep);
+    // Soft moon
+    px(ctx, 38, 8, 4, 4, mix(glassLite, "#fff8e0", 0.55));
+    px(ctx, 39, 9, 2, 2, "#fffaf0");
+    // Tiny stars
+    for (const [sx, sy] of [
+      [30, 8],
+      [33, 11],
+      [42, 10],
+      [44, 14],
+      [31, 15],
+    ] as const) {
+      dot(ctx, sx, sy, mix(glassLite, "#ffffff", 0.7));
+    }
+  }
+  // Arch mullions
+  px(ctx, 36, 6, 2, 14, frame);
+  px(ctx, 28, 12, 18, 1, frame);
+
+  // Climbing vines — continuous stems with leaf clusters hugging the frame
+  const ivy = mix(wallMoss, "#4a7850", 0.4);
+  const ivyLite = mix(ivy, "#a0d080", 0.45);
+  const ivyDark = shade(ivy, 0.72);
+  const stem = mix(ivy, "#3a5028", 0.55);
+
+  // Left vine: rises along the outer frame, then curls onto the arch
+  const leftStem: [number, number][] = [
+    [24, 20],
+    [24, 19],
+    [24, 18],
+    [25, 17],
+    [24, 16],
+    [24, 15],
+    [25, 14],
+    [24, 13],
+    [25, 12],
+    [25, 11],
+    [24, 10],
+    [25, 9],
+    [26, 8],
+    [27, 7],
+    [28, 6],
+    [29, 5],
+    [31, 4],
+    [33, 3],
+  ];
+  for (const [x, y] of leftStem) dot(ctx, x, y, stem);
+
+  // Left leaf pairs along the stem
+  for (const [x, y, side] of [
+    [23, 19, -1],
+    [23, 16, -1],
+    [23, 13, -1],
+    [26, 14, 1],
+    [23, 11, -1],
+    [26, 10, 1],
+    [26, 7, 1],
+    [30, 4, 1],
+  ] as const) {
+    dot(ctx, x, y, ivy);
+    dot(ctx, x + side, y - 1, ivyLite);
+    dot(ctx, x, y - 1, ivyDark);
+  }
+
+  // Right vine: mirrors up the frame and meets near the arch peak
+  const rightStem: [number, number][] = [
+    [49, 20],
+    [49, 19],
+    [49, 18],
+    [48, 17],
+    [49, 16],
+    [49, 15],
+    [48, 14],
+    [49, 13],
+    [48, 12],
+    [48, 11],
+    [49, 10],
+    [48, 9],
+    [47, 8],
+    [46, 7],
+    [45, 6],
+    [44, 5],
+    [42, 4],
+    [40, 3],
+  ];
+  for (const [x, y] of rightStem) dot(ctx, x, y, stem);
+
+  // Right leaf pairs
+  for (const [x, y, side] of [
+    [50, 19, 1],
+    [50, 16, 1],
+    [50, 13, 1],
+    [47, 14, -1],
+    [50, 11, 1],
+    [47, 10, -1],
+    [47, 7, -1],
+    [43, 4, -1],
+  ] as const) {
+    dot(ctx, x, y, ivy);
+    dot(ctx, x + side, y - 1, ivyLite);
+    dot(ctx, x, y - 1, ivyDark);
+  }
+
+  // Soft tendril tips meeting at the crown
+  dot(ctx, 35, 3, ivyLite);
+  dot(ctx, 36, 2, ivy);
+  dot(ctx, 37, 3, ivyLite);
+
+  // Large standing harp (left)
+  drawStandingHarp(ctx);
+
+  // Old oak chair shaped like a living tree (centre)
+  const oak = mix(wood, "#8a6038", 0.35);
+  const oakDark = shade(oak, 0.68);
+  const oakLite = mix(oak, "#e8d0a0", 0.3);
+  const bark = mix(oak, OUTLINE, 0.35);
+  const leaf = mix(theme.wall, "#4a7850", 0.55);
+  const leafLite = mix(leaf, "#a0d070", 0.45);
+  const leafDark = shade(leaf, 0.75);
+
+  // Root legs / base
+  px(ctx, 31, 32, 2, 2, oakDark);
+  px(ctx, 41, 32, 2, 2, oakDark);
+  px(ctx, 30, 33, 3, 1, bark);
+  px(ctx, 41, 33, 3, 1, bark);
+  dot(ctx, 29, 33, oakDark);
+  dot(ctx, 44, 33, oakDark);
+
+  // Trunk-like back posts (kept low so they clear the window)
+  px(ctx, 31, 22, 3, 8, oak);
+  px(ctx, 31, 22, 1, 8, oakLite);
+  px(ctx, 33, 22, 1, 8, oakDark);
+  px(ctx, 40, 22, 3, 8, oak);
+  px(ctx, 40, 22, 1, 8, oakLite);
+  px(ctx, 42, 22, 1, 8, oakDark);
+  // Bark knots
+  dot(ctx, 32, 24, bark);
+  dot(ctx, 41, 26, bark);
+  dot(ctx, 32, 28, oakDark);
+
+  // Branching crown / backrest — short forked limbs under the window
+  px(ctx, 32, 20, 10, 2, oak);
+  px(ctx, 32, 20, 10, 1, oakLite);
+  px(ctx, 30, 20, 3, 2, oakDark);
+  px(ctx, 41, 20, 3, 2, oakDark);
+  // Upward twigs
+  px(ctx, 33, 18, 2, 2, oak);
+  px(ctx, 38, 17, 2, 3, oak);
+  px(ctx, 36, 19, 2, 1, oakLite);
+  dot(ctx, 34, 17, oakDark);
+  dot(ctx, 39, 16, oakDark);
+
+  // Leaf clusters on the crown
+  for (const [lx, ly] of [
+    [32, 18],
+    [33, 17],
+    [34, 18],
+    [35, 17],
+    [37, 16],
+    [38, 17],
+    [39, 16],
+    [40, 18],
+    [41, 17],
+    [42, 19],
+    [31, 19],
+    [43, 19],
+  ] as const) {
+    dot(ctx, lx, ly, (lx + ly) % 2 === 0 ? leaf : leafLite);
+  }
+  dot(ctx, 36, 17, leafDark);
+  dot(ctx, 39, 18, leafDark);
+
+  // Branch arms
+  px(ctx, 28, 26, 4, 2, oak);
+  px(ctx, 28, 26, 4, 1, oakLite);
+  px(ctx, 42, 26, 4, 2, oak);
+  px(ctx, 42, 26, 4, 1, oakLite);
+  // Twig tips curling up
+  px(ctx, 27, 24, 2, 3, oakDark);
+  px(ctx, 45, 24, 2, 3, oakDark);
+  dot(ctx, 27, 23, leaf);
+  dot(ctx, 46, 23, leafLite);
+
+  // Seat — thick slab / stump cross-section
+  px(ctx, 30, 28, 14, 4, oakDark);
+  px(ctx, 31, 28, 12, 3, oak);
+  px(ctx, 32, 28, 10, 2, oakLite);
+  // Growth rings
+  px(ctx, 33, 29, 8, 1, bark);
+  px(ctx, 35, 29, 4, 1, mix(oakLite, "#fff8e0", 0.2));
+  dot(ctx, 37, 29, oakDark);
+
+  // Writing table (right) — potion bottles, cauldron, mortar
+  px(ctx, 52, 23, 24, 3, wood);
+  px(ctx, 52, 23, 24, 1, woodLite);
+  px(ctx, 52, 25, 24, 1, woodDark);
+  px(ctx, 53, 26, 2, 7, woodDark);
+  px(ctx, 73, 26, 2, 7, woodDark);
+  px(ctx, 55, 26, 2, 6, wood);
+  px(ctx, 71, 26, 2, 6, wood);
+  dot(ctx, 54, 32, woodLite);
+  dot(ctx, 74, 32, woodLite);
+
+  const glass = mix(theme.glass, "#d0e8f0", 0.5);
+  const bottleCork = "#8a5a30";
+  // Tall emerald potion
+  px(ctx, 54, 17, 3, 6, glass);
+  px(ctx, 54, 19, 3, 3, "#3cb878");
+  px(ctx, 55, 19, 1, 2, mix("#3cb878", "#ffffff", 0.35));
+  px(ctx, 55, 16, 1, 1, bottleCork);
+  // Round purple flask
+  px(ctx, 58, 19, 4, 4, glass);
+  px(ctx, 59, 20, 2, 2, "#7850c8");
+  px(ctx, 59, 18, 2, 1, glass);
+  px(ctx, 59, 17, 2, 1, bottleCork);
+  // Tiny red vial
+  px(ctx, 63, 20, 2, 3, glass);
+  px(ctx, 63, 21, 2, 2, "#d04860");
+  px(ctx, 63, 19, 2, 1, bottleCork);
+  // Brewing cauldron (centre)
+  const pot = "#3a3848";
+  const potLite = "#5a5870";
+  px(ctx, 66, 19, 6, 4, pot);
+  px(ctx, 65, 20, 8, 3, pot);
+  px(ctx, 66, 19, 6, 1, potLite);
+  px(ctx, 67, 20, 4, 2, "#50a878");
+  dot(ctx, 68, 20, mix("#50a878", "#ffffff", 0.4));
+  dot(ctx, 69, 19, mix("#50a878", "#fff8c0", 0.5));
+  // Wooden spoon resting on the rim
+  px(ctx, 70, 18, 1, 3, "#b89050");
+  dot(ctx, 70, 17, "#d4b070");
+  // Mortar & pestle
+  px(ctx, 73, 21, 3, 2, mix(wood, "#a09080", 0.4));
+  px(ctx, 74, 20, 1, 2, woodDark);
+  // Small blue bottle tucked right
+  px(ctx, 72, 18, 2, 3, glass);
+  px(ctx, 72, 19, 2, 2, "#4890c8");
+  px(ctx, 72, 17, 2, 1, bottleCork);
+
+  // Witch's ladder on a 9×9 grid (todo hotspot)
+  const chartFrame = mix(wood, "#a88850", 0.3);
+  const chartFrameLite = mix(chartFrame, "#e8d090", 0.35);
+  const sky = "#142048";
+  const rope = "#8a5a30";
+  const bead = "#e87820";
+
+  px(ctx, 59, 2, 14, 11, chartFrame);
+  px(ctx, 59, 2, 14, 1, chartFrameLite);
+  px(ctx, 60, 3, 12, 9, sky);
+
+  // 1-indexed 9×9 → sky at (61,3)..(69,11)
+  // Straight rope strands sit on columns 2, 5, 8; everything else is a bead.
+  const cells: [number, number][] = [
+    [2, 1],
+    [5, 1],
+    [8, 1],
+    [2, 2],
+    [5, 2],
+    [8, 2],
+    [2, 3],
+    [5, 3],
+    [8, 3],
+    [2, 4],
+    [4, 4],
+    [6, 4],
+    [8, 4],
+    [2, 5],
+    [4, 5],
+    [6, 5],
+    [8, 5],
+    [1, 6],
+    [3, 6],
+    [5, 6],
+    [8, 6],
+    [1, 7],
+    [3, 7],
+    [7, 7],
+    [9, 7],
+    [2, 8],
+    [7, 8],
+    [9, 8],
+    [8, 9],
+  ];
+  for (const [gx, gy] of cells) {
+    const isRope = gx === 2 || gx === 5 || gx === 8;
+    dot(ctx, 60 + gx, 2 + gy, isRope ? rope : bead);
+  }
+
+  // Soft oval rug with a faint moon motif
+  const rugC = theme.rug;
+  const rugD = shade(theme.rug, 0.72);
+  const rugL = mix(theme.rug, "#d8f0e8", 0.35);
+  px(ctx, 28, 39, 24, 4, rugD);
+  px(ctx, 26, 40, 28, 3, rugC);
+  px(ctx, 27, 39, 26, 4, rugC);
+  px(ctx, 28, 40, 24, 2, rugL);
+  px(ctx, 32, 40, 16, 2, rugD);
+  px(ctx, 34, 40, 12, 2, mix(rugC, rugL, 0.5));
+  dot(ctx, 39, 41, rugL);
+  dot(ctx, 40, 41, goldAccent(theme));
+  dot(ctx, 41, 41, rugL);
+
+  // Borders
+  px(ctx, 0, 0, ROOM_W, 1, OUTLINE);
+  px(ctx, 0, ROOM_INNER_H - 1, ROOM_W, 1, OUTLINE);
+  px(ctx, 0, 0, 1, ROOM_INNER_H, OUTLINE);
+  px(ctx, ROOM_W - 1, 0, 1, ROOM_INNER_H, OUTLINE);
+
+  if (glow > 0 && theme.windowPanes !== "desktop") {
+    ctx.save();
+    ctx.globalAlpha = glow * 0.14;
+    ctx.fillStyle = "#d8e8ff";
+    ctx.fillRect(28 * SCALE, (6 + ROOF_PAD) * SCALE, 18 * SCALE, 14 * SCALE);
+    ctx.restore();
+  }
+}
+
+function goldAccent(theme: Theme): string {
+  return mix(theme.furniture, "#f0c840", 0.55);
+}
+
 export function drawDeskStool(ctx: CanvasRenderingContext2D, theme: Theme) {
   const wood = theme.furniture;
   const woodDark = shade(wood, 0.68);
@@ -377,6 +941,10 @@ function drawStool(
 export function drawThemedRoom(ctx: CanvasRenderingContext2D, theme: Theme, glow: number) {
   if (theme.roomStyle === "dynasty") {
     drawDynastyRoom(ctx, theme, glow);
+    return;
+  }
+  if (theme.roomStyle === "enchanted") {
+    drawEnchantedRoom(ctx, theme, glow);
     return;
   }
   const wall = theme.wall;

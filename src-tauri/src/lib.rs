@@ -1,10 +1,11 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
-use tauri::{Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
+use tauri::{Manager, PhysicalPosition, Position, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 const PLAYER_URL: &str = "https://thinkcolorful.org/ytplayer/";
 static PLAYER_OPENED: AtomicBool = AtomicBool::new(false);
+static TODO_PLACED: AtomicBool = AtomicBool::new(false);
 
 fn radio_eval(app: &tauri::AppHandle, script: &str) {
     if let Some(window) = app.get_webview_window("radio") {
@@ -28,9 +29,67 @@ fn ensure_radio_window(app: &tauri::AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
+fn ensure_todo_window(app: &tauri::AppHandle) -> tauri::Result<()> {
+    if app.get_webview_window("todos").is_some() {
+        return Ok(());
+    }
+
+    WebviewWindowBuilder::new(app, "todos", WebviewUrl::App("todos.html".into()))
+        .title("To-do")
+        .inner_size(180.0, 220.0)
+        .resizable(false)
+        .decorations(false)
+        .transparent(true)
+        .always_on_top(true)
+        .visible(false)
+        .skip_taskbar(true)
+        .shadow(false)
+        .build()?;
+
+    Ok(())
+}
+
 #[tauri::command]
 fn quit_app(app: tauri::AppHandle) {
     app.exit(0);
+}
+
+fn place_todo_beside_room(app: &tauri::AppHandle) {
+    let Some(main) = app.get_webview_window("main") else {
+        return;
+    };
+    let Some(todos) = app.get_webview_window("todos") else {
+        return;
+    };
+    let Ok(pos) = main.outer_position() else {
+        return;
+    };
+    let Ok(size) = main.outer_size() else {
+        return;
+    };
+    // Sit just to the right of the room, lined up with the top edge.
+    let gap = 8i32;
+    let x = pos.x + size.width as i32 + gap;
+    let y = pos.y;
+    let _ = todos.set_position(Position::Physical(PhysicalPosition::new(x, y)));
+}
+
+#[tauri::command]
+fn todo_toggle_window(app: tauri::AppHandle) -> Result<(), String> {
+    ensure_todo_window(&app).map_err(|e| e.to_string())?;
+    if let Some(window) = app.get_webview_window("todos") {
+        if window.is_visible().unwrap_or(false) {
+            let _ = window.hide();
+        } else {
+            if !TODO_PLACED.swap(true, Ordering::Relaxed) {
+                place_todo_beside_room(&app);
+            }
+            let _ = window.show();
+            let _ = window.unminimize();
+            let _ = window.set_focus();
+        }
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -94,12 +153,14 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             quit_app,
+            todo_toggle_window,
             radio_toggle_window,
             radio_play_pause,
             radio_stop
         ])
         .setup(|app| {
             let _ = ensure_radio_window(app.handle());
+            let _ = ensure_todo_window(app.handle());
 
             let show = MenuItem::with_id(app, "show", "Show", true, None::<&str>)?;
             let hide = MenuItem::with_id(app, "hide", "Hide", true, None::<&str>)?;
